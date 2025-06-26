@@ -17,7 +17,9 @@ void CPUCore::run() {
     while (!m_stopFlag) {
 
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [&] { return ready.load(); });
+        cv.wait_for(lock, std::chrono::milliseconds(1000), [&] {
+            return ready.load() || m_stopFlag;
+            });
         if (m_stopFlag) break;
         if (curr_p) {
             sleep(std::chrono::milliseconds(CPU::getDelays()));
@@ -31,10 +33,8 @@ void CPUCore::run() {
 
         }
         ready.store(false);
-        if (endBarrier && !m_stopFlag) {
 
-            endBarrier->arrive_and_wait(); // Arrive and block until all other threads finish
-        }
+        endBarrier->arrive_and_wait(); // Arrive and block until all other threads finish
 
     }
 }
