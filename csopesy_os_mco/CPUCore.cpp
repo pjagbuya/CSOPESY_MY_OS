@@ -21,7 +21,7 @@ void CPUCore::run() {
             return ready.load() || m_stopFlag;
             });
         if (m_stopFlag) break;
-        if (curr_p) {
+        if (curr_p && ready.load()) {
             sleep(std::chrono::milliseconds(CPU::getDelays()));
 
             this->curr_p->executeCurrentCommand();
@@ -34,7 +34,9 @@ void CPUCore::run() {
         }
         ready.store(false);
 
-        endBarrier->arrive_and_wait(); // Arrive and block until all other threads finish
+        if(endBarrier||!m_stopFlag)
+            endBarrier->arrive_and_wait();
+
 
     }
 }
@@ -110,7 +112,6 @@ void CPUCore::stopCore()
 void CPUCore::stopPersistentThread()
 {
     this->m_stopFlag.store(true);
-	endBarrier = nullptr; // Clear the end barrier to avoid deadlock
     setReady();
 }
 
