@@ -5,220 +5,168 @@
 #include <ctime>     // For time_t, std::tm, and related functions like localtime
 #include <iomanip>   // For std::put_time
 #include <sstream>   // For std::stringstream
+#include <mutex>
+#include <unordered_map>
 
-#include "console.h"
 #include "screen.h"
+#include "AConsole.h"
 #include "input_manager.h"
-
-
+#include "Scheduler.h"
+#include "MainConsole.h"
+#include "process.h"
+#include <fstream>
 
 #define RESET "\033[0m"
 #define YELLOW "\033[33m"
 #define GREEN "\033[32m"
+#define DEFAULT_PROCESS_COUNT 20
 
 
 #define DEFAULT_SIZE 10
 
+
+
+//std::unordered_map<std::string, std::shared_ptr<AConsole>> ConsoleTable;
+
+
+const std::string MAIN_CONSOLE = "MAIN_CONSOLE";
+const std::string MARQUEE_CONSOLE = "MARQUEE_CONSOLE";
+const std::string SCHEDULING_CONSOLE = "SCHEDULING_CONSOLE";
+const std::string MEMORY_CONSOLE = "MEMORY_CONSOLE";
+
 using stdstr = std::string;
+class Scheduler;
+
 
 class ScreenController
 {
 public:
-	ScreenController() {
-		this->main_screen = std::make_shared<Console>();
-		this->backup_main_screen = main_screen;
-		this->inputMan = InputMan();
-		this->input = "";
-		this->action = -999;
-		this->sKeys = -1;
-		this->screens = {};
-		this->isInScreen = false;
-		isCmdQuit = false;
-		isCmdDone = false;
-		isCmdClear = false;
 
-	}
+	typedef std::unordered_map<std::string, std::shared_ptr<AConsole>> ConsoleTable;
 
 
-	std::shared_ptr<Screen> findScreen(std::string& name) {
+	static ScreenController* getInstance();
+	static void initialize();
+	static void destroy();
+	
 
-		for (auto& screen_ptr : this->screens) {
-			if (screen_ptr->getName() == name) {
-				return screen_ptr; // Return the shared_ptr itself
-			}
-		}
-		return nullptr;
-	}
-
-	void displayCliAllProcess() {
-		this->main_screen->ConsoleCliListFlush();
-
-		for (auto& screen_ptr : this->screens) {
-			
-			this->main_screen->ConsoleListPush(screen_ptr->getProcessNameAndInfo(), 0 , 1);
-			
-		}
-		
-	}
+	void readConfigFileAndInitializeCPU(const std::string& filename);
+	std::shared_ptr<Screen> findScreen(std::string& name);
 
 
-	bool isScreenHere(std::string& name) {
-		std::shared_ptr<Screen> tempScreen;
-		tempScreen= findScreen(name);
-
-		if (tempScreen == nullptr) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-
-	std::shared_ptr<Screen> createScreen(std::string& name) {
-		if (isScreenHere(name)) {
-			this->main_screen->ConsoleFlush(0);
-			swapScreen(name);
-			return findScreen(name);
-		}
-		else {
-
-			std::shared_ptr<Screen> newScreen = std::make_shared<Screen>(name);
-			screens.push_back(newScreen);
-			this->main_screen->ConsoleFlush(0);
-			swapScreen(name);
-
-			return newScreen;
-		}
-	}
-
-	void swapScreen(std::string name) {
-
-		std::shared_ptr<Screen> foundScreen = findScreen(name);
-		if (foundScreen) {
-			this->main_screen = foundScreen;
-		}
-		else {
-
-		}
-
-		
-
-	}
-	std::string executeInput(int& action, bool& isCmdDone, bool& isCmdQuit) {
-		switch (action) {
-		case 0:	// Initializing
-			isCmdDone = true;
-			return "initialize" + default_msg;
-		case 1:	// exit
-			if (isInScreen) {
-				this->backToMain();
-				isCmdDone = true;
-				isInScreen = false;
-				return "exiting screen";
-			}
-			else {
-				isCmdDone = true;
-				isCmdQuit = true;
-				return "Goodbye and Thank you!";
-			}
-
-		case 2: // screen -s
-			isCmdDone = true;
-
-			if (this->match.size() > 1) {
-				std::string tempVal = this->match[1].str();
-				if (isScreenHere(tempVal)) {
-					return "Swapped to screen " + tempVal;
-				}
-				else {
-					this->createScreen(tempVal);
-					isInScreen = true;
-					return "Created screen " + tempVal;
-				}
-
-			}
-			return "Error: screen "+ this->match[1].str() + " not created";
-		case 3: // screen -ls
-			isCmdDone = true;
-			this->displayCliAllProcess();
-			return "screen -ls" + default_msg;
-		case 4: // scheduler-start
-			isCmdDone = true;
-			return "scheduler-start" + default_msg;
-		case 5: // scheduler-stop
-			isCmdDone = true;
-			return "scheduler-stop" + default_msg;
-		case 6: // report-util
-			isCmdDone = true;
-			return "report-util" + default_msg;
-		case 7: // ping
-			isCmdDone = true;
-			return "pong";
-		case 8: // clear
-			isCmdDone = true;
-			this->main_screen->ConsoleCliListFlush();
-			return "clear" + default_msg;
-
-		case -1: // Invalid command
-			isCmdDone = true;
-			return "Invalid command. Please try again.";
-		default:
-			isCmdDone = false;
-			return "Unknown action code encountered.";
-		}
+	void swapScreen(std::shared_ptr<Screen> newScreen);
+	void swapScreen(std::string name);
 
 
-	}
-	void callInputListener() {
-		std::string outputListener;
 
-		// Modifies and clears input
-		inputMan.Input(input, sKeys, isCmdDone);
+	void callInputListener();
 
-		// Modifies this action and isCmdDone
-		inputMan.CLI_Comms(this->input, this->action, this->isCmdDone, match);
-		outputListener = this->executeInput(this->action, this->isCmdDone, this->isCmdQuit);
-		
+	void backToMain();
 
-		this->main_screen->ConsoleFillHeader();
-		this->main_screen->ConsoleUpdateInput(input);
 
-		if (this->isCmdDone) {
-			this->main_screen->ConsoleListPush(outputListener, 1, 0);
-			this->isCmdDone = false;
-			this->action = -999;
-		}
-		this->main_screen->ConsoleFillCliList();
+	// Creates a screen, swaps if exists by default
+	std::shared_ptr<Screen> createScreen(std::string& name);
+	void addScreen(std::shared_ptr<Screen> screen);
 
-		this->main_screen->ConsoleOut();
-	}
 
-	void backToMain() {
-		this->main_screen = this->backup_main_screen;
-	}
+	std::smatch getMatch();
 
-	bool isCommandQuit() {
-		return isCmdQuit;
-	}
+	HANDLE getConsoleHandle();
+	std::string getInput();
+	uint64_t getExecDelay();
+
+
+	void swapToMarquee();
+	void doThreadedMarquee();
+
+	bool isCommandQuit();
+	bool isCommandDone();
+	bool isCommandClear();
+
+	bool isScreenHere(std::string& name);
+	
+
+	void setCommandQuit(bool val);
+	void setCommandDone(bool val);
+	void setCommandClear(bool val);
+	std::string getDebugLogs();
+
+	void startScheduler();
+	void stopScheduler();
+	std::vector<std::shared_ptr<Screen>> getScreens();
+
+	std::vector<std::shared_ptr<Process>> getProcessList();
+	std::unordered_map<int, std::shared_ptr<Process>> getProcessTable();
+	void setMessageAtScreen(int pid, std::string msgLog);
+
+	shared_ptr<Process> getProcessAt(int pid);
+	void setProcessAt(int pid, shared_ptr<Process>);
+
+
+	mutex getMtx();
+	void notifyCleanUpLoop();
+	void cleanUploop();
+
+
+	void debugLogs();
+
+
+
+
+
 
 
 private:
-	
-	std::shared_ptr<Console> main_screen;
-	std::shared_ptr<Console> backup_main_screen;
-	std::string default_msg = " command recognized. Doing something";
-	std::smatch match;
+	ScreenController();
+	~ScreenController();
+	ScreenController(ScreenController const&) {};
+	ScreenController& operator=(ScreenController const&) {};
+	static ScreenController* sharedInstance;
+
+
+	ConsoleTable consoleTable;
+	std::shared_ptr<AConsole> currentConsole;
+	std::shared_ptr<AConsole> previousConsole;
+
+	HANDLE consoleHandle;
+
+	std::shared_ptr<AConsole> main_screen;
+	std::shared_ptr<AConsole> marquee;
+	std::shared_ptr<AConsole> backup_main_screen;
+
 	InputMan inputMan;
 	std::vector<std::shared_ptr<Screen>> screens;
+	std::vector<std::shared_ptr<Process>> processList;
+
+
+
 	int sKeys;
 	int action;
-	std::string input;
+	uint64_t exec_delay;
 
+	std::mutex mtx;
+
+	
+	std::shared_ptr<Scheduler> scheduler;
+
+
+	std::string input;
+	std::smatch match;
 
 	bool isInScreen;
 	bool isCmdQuit;
 	bool isCmdDone;
 	bool isCmdClear;
+	bool isThreadedMarquee;
+
+
+	atomic<bool> isSchedulerOn;
+
+
+	std::condition_variable cleanupCv;
+	bool stopCleanupThread = false;
+	std::thread cleanupThread;
+
 
 
 };

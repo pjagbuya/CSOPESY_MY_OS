@@ -124,22 +124,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="console.cpp" />
+    <ClCompile Include="AConsole.cpp" />
+    <ClCompile Include="AddCommand.cpp" />
+    <ClCompile Include="Algorithm.cpp" />
     <ClCompile Include="cpu.cpp" />
-    <ClCompile Include="header.cpp" />
+    <ClCompile Include="CPUCore.cpp" />
+    <ClCompile Include="DeclareCommand.cpp" />
+    <ClCompile Include="ForCommand.cpp" />
+    <ClCompile Include="globals.cpp" />
+    <ClCompile Include="ICommand.cpp" />
     <ClCompile Include="input_manager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainConsole.cpp" />
+    <ClCompile Include="Marquee.cpp" />
+    <ClCompile Include="PrintCommand.cpp" />
+    <ClCompile Include="process.cpp" />
+    <ClCompile Include="Scheduler.cpp" />
     <ClCompile Include="screen.cpp" />
     <ClCompile Include="screen_controller.cpp" />
+    <ClCompile Include="SleepCommand.cpp" />
+    <ClCompile Include="SubtractCommand.cpp" />
+    <ClCompile Include="threadable.cpp" />
+    <ClCompile Include="threadablejoin.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="console.h" />
+    <ClInclude Include="AConsole.h" />
+    <ClInclude Include="AddCommand.h" />
+    <ClInclude Include="Algorithm.h" />
     <ClInclude Include="cpu.h" />
-    <ClInclude Include="header.h" />
+    <ClInclude Include="CPUCore.h" />
+    <ClInclude Include="DeclareCommand.h" />
+    <ClInclude Include="ForCommand.h" />
+    <ClInclude Include="globals.h" />
     <ClInclude Include="heindarobo.h" />
+    <ClInclude Include="ICommand.h" />
     <ClInclude Include="input_manager.h" />
+    <ClInclude Include="MainConsole.h" />
+    <ClInclude Include="Marquee.h" />
+    <ClInclude Include="PrintCommand.h" />
+    <ClInclude Include="process.h" />
+    <ClInclude Include="Scheduler.h" />
     <ClInclude Include="screen.h" />
     <ClInclude Include="screen_controller.h" />
+    <ClInclude Include="SleepCommand.h" />
+    <ClInclude Include="SubtractCommand.h" />
+    <ClInclude Include="threadable.h" />
+    <ClInclude Include="threadablejoin.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="config.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

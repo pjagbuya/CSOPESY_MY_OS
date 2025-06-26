@@ -4,9 +4,8 @@
 #include <regex>
 #include <vector>
 #include <array>
-#include "screen_controller.h"
 #include "heindarobo.h"
-
+#include "screen_controller.h"
 
 const static std::array<std::vector<std::string>, 8> hidr_frames = {
 	 hidr_frame1,
@@ -35,11 +34,12 @@ using namespace std;
 
 void startMainLoop() {
 
-	ScreenController sc = ScreenController();
-	while (!sc.isCommandQuit()) {
-		sc.callInputListener();
-		Sleep(100);
+	ScreenController::initialize();
+
+	while (!ScreenController::getInstance()->isCommandQuit()) {
+		ScreenController::getInstance()->callInputListener();
 	}
+	ScreenController::destroy();
 }
 
 int main()

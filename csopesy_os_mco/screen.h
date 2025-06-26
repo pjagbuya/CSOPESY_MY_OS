@@ -5,92 +5,88 @@
 #include <regex>
 #include <vector>
 #include <array>
-#include <vector>
 #include <chrono>
 #include <ctime>     // For time_t, std::tm, and related functions like localtime
 #include <iomanip>   // For std::put_time
 #include <sstream>   // For std::stringstream
-#include "console.h"
+#include <random>
 
-extern vector<string> ascii_art;
+#include "AConsole.h"
+#include "process.h"
 
+
+extern std::vector<std::string> ascii_art;
+
+
+#define VISIBLE_LINES_MAX 40
 using str = std::string;
 
-class Screen:public Console
+
+class Process;
+class Screen:public AConsole
 {
 
 public:
 	Screen() = delete;
-	Screen(string name) {
+	Screen(std::string name);
 
+	std::string getName();
 
-		this->h_console = GetStdHandle(STD_OUTPUT_HANDLE);
-		CONSOLE_SCREEN_BUFFER_INFO csbi;
-		GetConsoleScreenBufferInfo(this->h_console, &csbi);
+	void UpdateDisplayBuffer();
+	void displayProcessSmi();
 
-		this->max_width = csbi.srWindow.Right;
-		this->max_height = csbi.srWindow.Bottom;
-		this->scroll_offset = 0;
-		for (int i = 0; i < ARR_SIZE; ++i) {
-			output_list[i] = '\0';
-		}
-		
+	void onEnabled() override;
+	void display() override;
+	void process() override;
 
+	void ConsoleUpdateInput(std::string input);
+	void ConsoleFillCliList();
+	void ConsoleOut();
+	void ScrollUp();
+	void ScrollDown();
+	void ParseSkeys(int& action, int& sKeys);
+	void ParseAction(std::string& input, int& action) ;
+	std::string getProcessNameAndInfo() ;
+	unsigned short getPid() const;
 
+	
+	std::shared_ptr<Process> getAttachedProcess();
 
-		auto now = std::chrono::system_clock::now();
-		time_t now_c = std::chrono::system_clock::to_time_t(now);
-		std::tm tm_struct;
-		localtime_s(&tm_struct, &now_c);
-		std::stringstream ss;
+	static int getProcessCount();
+	static void setProcessCount(int count);
+	static void incProcessCount();
+	static void decProcessCount();
 
-		this->display_buffer = {};
-		ss << std::put_time(&tm_struct, "%m/%d/%Y, %I:%M:%S %p");
-		this->creation_timestamp = ss.str();
-		this->name = name;
-		this->process_name = "OMG get in the robot shinji process";
-		this->current_line_instruction = 0;
-		this->total_lines_instruction = 100;
-
-		this->UpdateDisplayBuffer();
-		this->setHeaderFrameSize(ascii_art.size() + this->display_buffer.size());
-
-
-	}
-
-	void ConsoleFillHeader() override{
-		this->ConsoleFill(0, ascii_art.size(), ascii_art);
-		this->ConsoleFill(ascii_art.size(), this->display_buffer.size(), this->display_buffer);
-		this->ConsoleFill(this->header_frame_size, str(YELLOW) + "Welcome to CSOPESY Command Line");
-		this->ConsoleFill(this->header_frame_size + 1, str(YELLOW) + "'exit' to quit, 'clear' to clear the screen");
-	}
-
-	string getName() {
-		return name;
-	}
-
-	void UpdateDisplayBuffer() {
-		display_buffer.clear();
-		display_buffer.push_back("--- Screen: " + this->name + " ---");
-		display_buffer.push_back("Process Name: " + process_name);
-		display_buffer.push_back("Instruction: " + std::to_string(current_line_instruction) + " / " + std::to_string(total_lines_instruction));
-		display_buffer.push_back("Created: " + creation_timestamp);
-		display_buffer.push_back("------------------------");
-
-
-	}
-
-	string getProcessNameAndInfo() {
-		return "Name: " + name + "| Instruction: " + std::to_string(current_line_instruction) + " / " + std::to_string(total_lines_instruction);
-	}
+	bool shouldBeDestroyed() const;
+	bool isScreenUsed() const;
 
 private:
-	string name;
-	string process_name;
-	int current_line_instruction;
-	int total_lines_instruction;
-	string creation_timestamp;
+	std::string name;
+	std::string process_name;
+
+
+	int pid;
+	int scroll_offset2;
+	int indexInput;
+	bool isUsingScreen;
+	std::string creation_timestamp;
+	static int process_count;
+
+
 	std::vector<std::string> display_buffer;
+	std::vector<std::string> process_buffer;
+	std::vector<std::string> logs_buffer;
+
+
+	std::shared_ptr<std::vector<std::string>> process_output_list;
+
+	std::shared_ptr<Process> attachedProcess;
+	std::string default_msg = " command recognized. Doing something";
+	std::string debug_msg = "";
+
+
+
+	void ConsoleFillHeader();
 
 };
 

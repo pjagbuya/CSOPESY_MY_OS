@@ -1,0 +1,11 @@
+================= PROCESS REPORT =================
+
+Running Processes:
+  - process: process_28	(06/27/2025, 05:26:13 AM) | Core: 0	 |Instruction: 9 / 1435
+  - process: process_29	(06/27/2025, 05:26:13 AM) | Core: 1	 |Instruction: 7 / 1112
+  - process: process_30	(06/27/2025, 05:26:13 AM) | Core: 2	 |Instruction: 7 / 1127
+  - process: process_31	(06/27/2025, 05:26:13 AM) | Core: 3	 |Instruction: 8 / 1177
+
+Finished Processes:
+
+==================================================
