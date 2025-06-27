@@ -31,6 +31,7 @@ private:
     int core_id;  
     std::atomic<bool> busy; // Use std::atomic instead of atomic  
     std::mutex mtx;
+    std::mutex m_currProcessMutex;
     std::shared_ptr<Process> curr_p;  
     std::atomic<bool> ready;
     std::condition_variable cv;

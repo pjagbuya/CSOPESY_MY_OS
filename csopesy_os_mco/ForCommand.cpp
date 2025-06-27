@@ -23,6 +23,8 @@ ForCommand::ForCommand(int pid, int counter, int layer)
 
 	processTemp->updateForLoopTable(currCounterVar, 0);
 	processTemp->updateForLoopTable(currCommandIndexVar, 0);
+	processTemp->updateForLoopTable("INTERRUPT", 0);
+
 
 }
 
@@ -36,43 +38,51 @@ void ForCommand::addCommand(std::shared_ptr<ICommand> command) {
 
 void ForCommand::execute() const {
 	std::shared_ptr<Process> processTemp = process_table[pid];
-	std::unordered_map<std::string, uint16_t> symbolTable = processTemp->getForLoopTable();
-	uint16_t currCounter = symbolTable[currCounterVar];
-	uint16_t currCommandIndex = symbolTable[currCommandIndexVar];
+	uint16_t currCounter = processTemp->readAtForLoopTable(currCounterVar);
+	uint16_t currCommandIndex = processTemp->readAtForLoopTable(currCommandIndexVar);
 	processTemp->ConsoleLogPush();
 	int core_id = processTemp->getCPUCoreID();
+	int interrupt = processTemp->readAtForLoopTable("INTERRUPT");
 
-	if (currCounter >= counter) {
-
-		if(layer==0)
-			processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
-		return;
-
+	if (layer == 0) {
+		processTemp->updateForLoopTable("INTERRUPT", 0);
 	}
 
+	while (currCounter < counter) {
+		if (currCounter >= counter) {
+			processTemp->updateForLoopTable("INTERRUPT", 0);
 
-	if (currCommandIndex < maxCommands) {
-		if (commandList.empty()) { 
-			
-		}
-		else {
-			if(commandList.at(currCommandIndex))
-				commandList.at(currCommandIndex)->execute();
+			if (layer == 0)
+				processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
+			return;
 
 		}
-		currCommandIndex++;
-		processTemp->updateForLoopTable(currCommandIndexVar, currCommandIndex);
-	}
-	if (currCommandIndex >= maxCommands) {
-	
-		currCommandIndex = 0; 
-		processTemp->updateForLoopTable(currCommandIndexVar, currCommandIndex); 
-		currCounter++; 
-		processTemp->updateForLoopTable(currCounterVar, currCounter); 
+
+
+		if (currCommandIndex < maxCommands) {
+			if (commandList.empty()) {
+
+			}
+			else {
+				if (commandList.at(currCommandIndex))
+					commandList.at(currCommandIndex)->execute();
+
+			}
+			currCommandIndex++;
+			processTemp->updateForLoopTable(currCommandIndexVar, currCommandIndex);
+		}
+		if (currCommandIndex >= maxCommands) {
+
+			currCommandIndex = 0;
+			processTemp->updateForLoopTable(currCommandIndexVar, currCommandIndex);
+			currCounter++;
+			processTemp->updateForLoopTable(currCounterVar, currCounter);
+
+		}
+		if (layer == 0 && currCounter < counter)
+			processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 1);
 
 	}
-	if (layer == 0 && currCounter < counter)
-		processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 1);
 
 
 

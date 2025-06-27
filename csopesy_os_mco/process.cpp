@@ -30,7 +30,9 @@ void Process::addCommand(std::shared_ptr<ICommand> command) {
 
 // Executes the "current command" — stubbed logic
 void Process::executeCurrentCommand() {
-    this->commandList.at(instruction_index)->execute();
+	std::lock_guard<std::mutex> lock(mtxProcess);
+    if(this->readAtForLoopTable("INTERRUPT") == 0)
+        this->commandList.at(current_line_instruction)->execute();
 
 }
 
@@ -45,12 +47,7 @@ void Process::setProcessCommands(std::vector<std::shared_ptr<ICommand>> commands
 // Moves to the next command
 void Process::moveToNextLine() {
 
-    if (current_line_instruction < total_lines_instruction) {
-        if ((readAtForLoopTable("FORLOOP_INTERRUPTED_1") == 0))
-            instruction_index++;
-
-    }
-    current_line_instruction++;
+    if(this) current_line_instruction++;
 
 }
 
@@ -125,7 +122,9 @@ ProcessState Process::getState() const {
     // You might want to store `state` in a private member (commented out in your header)
     return this->state;
 }
-std::string Process::getCurrMsgLog() const {
+std::string Process::getCurrMsgLog() {
+    std::lock_guard<std::mutex> lock(mtxMsg);
+
     return currMsgLog;
 }
 void Process::setProcessState(ProcessState state)
@@ -208,6 +207,8 @@ void Process::resetLoggingLimit()
 
 void Process::setCurrMsgLog(std::string msg)
 {
+    std::lock_guard<std::mutex> lock(mtxMsg);
+
     currMsgLog = msg;
 }
 

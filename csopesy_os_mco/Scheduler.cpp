@@ -196,6 +196,8 @@ void Scheduler::schedulerStop()
 
 void Scheduler::schedulerDestroy()
 {
+	CPU::stopAllCores();
+
 	setIsStopScheduling(true);
 	setIsOn(false);
 	clearQueue(readyQueue);
@@ -404,12 +406,12 @@ std::shared_ptr<ICommand> Scheduler::generateRandomCommand(int pid, int layer, u
 			for (int i = 0; i < num_comms; ++i) {
 
 				// Each command is ran by forCounterRand times
-				if(currCount + forCounterRand > maxCount){
+				if(currCount + 1 > maxCount){
 					break;
 				}
 
 				loop->addCommand(generateRandomCommand(pid, layer + 1, currCount, maxCount));
-				currCount += forCounterRand;
+				currCount += 1;
 
 			}
 			return loop;

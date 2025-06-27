@@ -136,7 +136,9 @@ void CPU::stopAllCores()
     for (const auto& core : CPUCores) {
         core->stopCore();
         core->stopPersistentThread();
-
+    }
+    for (const auto& core : CPUCores) {
+        core->join();
     }
 
     CPUCores.clear();

@@ -63,6 +63,7 @@ ScreenController::~ScreenController() {
 	if (cleanupThread.joinable()) {
 		cleanupThread.join();
 	}
+
 	ScreenController::screens = {};
 	process_table.clear();
 	scheduler->schedulerDestroy();
@@ -296,12 +297,11 @@ void ScreenController::setCommandQuit(bool val) {
 	
 	scheduler->schedulerStop();
 	scheduler->schedulerDestroy();
-	CPU::stopAllCores();
 
 
-	screens.clear();
-	processList.clear();
-	process_table.clear();
+	//screens.clear();
+	//processList.clear();
+	//process_table.clear();
 
 };
 void ScreenController::setCommandDone(bool val) { isCmdDone = true; };

@@ -5,9 +5,7 @@ ThreadableJ::ThreadableJ() : m_stopFlag(false)
 
 ThreadableJ::~ThreadableJ()
 {
-    if (m_thread.joinable()) {
-        m_thread.join();
-    }
+
 }
 
 void ThreadableJ::start() {

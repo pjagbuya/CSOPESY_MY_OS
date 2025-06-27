@@ -10,7 +10,6 @@ CPUCore::CPUCore(int id)
 
 CPUCore::~CPUCore()
 {
-
 }
 
 void CPUCore::run() {
@@ -21,15 +20,21 @@ void CPUCore::run() {
             return ready.load() || m_stopFlag;
             });
         if (m_stopFlag) break;
+
+
+        std::unique_lock<std::mutex> process_exec_lock(m_currProcessMutex);
         if (curr_p && ready.load()) {
             sleep(std::chrono::milliseconds(CPU::getDelays()));
-
-            this->curr_p->executeCurrentCommand();
-            this->curr_p->ConsoleLogPush();
-            this->curr_p->moveToNextLine();
-            if (this->curr_p->isFinished()) {
+            if (!curr_p && curr_p->isFinished()) {
                 stopCore();
             }
+            else {
+                curr_p->executeCurrentCommand();
+                curr_p->ConsoleLogPush();
+                curr_p->moveToNextLine();
+            }
+
+
 
         }
         ready.store(false);
@@ -65,8 +70,15 @@ void CPUCore::setCoreId(int id)
 void CPUCore::setCurrentProcess(std::shared_ptr<Process> p)
 {
     std::unique_lock<std::mutex> lock(mtx);
+    if (p == nullptr) {
+        this->curr_p->updateSymbolTable("INTERRUPT", 1);
+        this->curr_p.reset();
+    }
+    else {
+        this->curr_p = p;
 
-	this->curr_p = p;
+    }
+
 }
 
 std::shared_ptr<Process> CPUCore::getCurrentProcess()
@@ -111,6 +123,11 @@ void CPUCore::stopCore()
 
 void CPUCore::stopPersistentThread()
 {
+    if (curr_p) {
+        this->curr_p->updateSymbolTable("INTERRUPT", 1);
+        this->curr_p.reset();
+    }
+
     this->m_stopFlag.store(true);
     setReady();
 }

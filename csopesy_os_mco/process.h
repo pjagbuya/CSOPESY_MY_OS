@@ -34,7 +34,7 @@ public:
 	int getCPUCoreID() const;
 	ProcessState getState() const;
 	std::string getName() const;
-	std::string getCurrMsgLog() const;
+	std::string getCurrMsgLog();
 	std::string getTimeStamp();
 	std::vector<std::string> getPrintLog();
 	int getVariableCounter() const;
@@ -78,6 +78,10 @@ private:
 	int variableCounter;
 	int loggingLimit;
 	std::mutex mtx;
+	std::mutex mtxMsg;
+	std::mutex mtxProcess;
+
+
 
 
 	ProcessState state;
