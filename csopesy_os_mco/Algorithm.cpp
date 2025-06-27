@@ -70,7 +70,7 @@ void Algorithm::executeAlgorithm() {
 
 void Algorithm::runFCFSAlgo()
 {
-
+    clearRunning();
 
     for (size_t i = 0; i < CPU::getMaxCores(); ++i) {
         if (CPUCores.empty()) {
@@ -112,7 +112,11 @@ void Algorithm::runFCFSAlgo()
 
         CPUCores[i]->setReady();
     }
+    for (int i = 0; CPUCores.size(); i++) {
+        if (CPUCores[i] && CPUCores[i]->getCurrentProcess())
+            runningQueue.push(CPUCores[i]->getCurrentProcess());
 
+    }
     //int newSyncNum = coresWithProcess.size();
 
     //std::shared_ptr<std::barrier<>> startBarrier = std::make_shared<std::barrier<>>(newSyncNum);
@@ -143,6 +147,8 @@ void Algorithm::runFCFSAlgo()
 
 void Algorithm::runRRAlgo()
 {
+    clearRunning();
+
     for (size_t i = 0; i < CPUCores.size(); i++) {
         //shared_ptr<CPUCore>& core = ;
 
@@ -196,6 +202,7 @@ void Algorithm::runRRAlgo()
             CPUCores[i]->setCurrentProcess(process);
             CPUCores[i]->setBusy(true);
 
+
             quantum_cycles[i] = 0;
 
         }
@@ -204,11 +211,47 @@ void Algorithm::runRRAlgo()
 
     }
 
+    
 
+    for (const auto& core : CPUCores) {
+        if(core->getCurrentProcess())
+            runningQueue.push(core->getCurrentProcess());
+
+    }
     //startBarrier = std::make_shared<std::barrier<>>(0);
     //endBarrier = std::make_shared<std::barrier<>>(0);
     //for (int& id : coresWithProcess) {
     //    CPUCores[id]->setBarriers(startBarrier, endBarrier);
 
     //}
+}
+
+void Algorithm::clearQueues()
+{
+    while (!this->terminatedProcesses.empty()) {
+        this->terminatedProcesses.pop();
+    }
+    while (!this->readyQueue.empty()) {
+        this->readyQueue.pop();
+    }
+    while (!this->runningQueue.empty()) {
+        this->runningQueue.pop();
+    }
+}
+
+void Algorithm::clearRunning()
+{
+    while (!this->runningQueue.empty()) {
+        this->runningQueue.pop();
+    }
+}
+
+std::queue<std::shared_ptr<Process>> Algorithm::getReadyQueue()
+{
+    return readyQueue;
+}
+
+std::queue<std::shared_ptr<Process>> Algorithm::getRunningQueue()
+{
+    return runningQueue;
 }

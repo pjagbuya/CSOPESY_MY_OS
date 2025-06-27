@@ -113,7 +113,9 @@ public:
 
 
 
-
+	std::queue<Process> getReadyQueue();
+	std::queue<Process> getTerminatedProcesses();
+	std::queue<Process> getRunningQueue();
 
 
 private:

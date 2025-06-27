@@ -10,7 +10,9 @@ std::string CPU::algoName = "";
 uint64_t CPU::min_ins = 0;
 uint64_t CPU::max_ins = 0;
 int CPU::syncCheck = 0;
-
+int CPU::cores_used = 0;
+int CPU::cores_available = 0;
+int CPU::core_utilization = 0;
 
 
 CPU::CPU()
@@ -74,6 +76,23 @@ void CPU::runCores()
 	}
 }
 
+void CPU::catchCoreStatus()
+{
+    cores_used = 0;
+    cores_available = 0;
+    core_utilization = 0;
+    for(const auto& core : CPUCores) {
+        if (core->isBusy()) {
+            cores_used++;
+        }
+        else {
+            cores_available++;
+        }
+	}
+    double core_utilization_percentage = static_cast<double>(cores_used) / max_core * 100.0; // Example calculated value
+    core_utilization = static_cast<int>(core_utilization_percentage);
+}
+
 bool CPU::checkSyncCheck()
 {
     return (syncCheck = max_core);
@@ -134,6 +153,7 @@ void CPU::stopAllCores()
 {
     int i = 0;
     for (const auto& core : CPUCores) {
+
         core->stopCore();
         core->stopPersistentThread();
     }
@@ -141,11 +161,17 @@ void CPU::stopAllCores()
         core->join();
     }
 
-    CPUCores.clear();
+
 }
 
 
-void CPU::CpuReport()
+std::vector<std::string> CPU::CpuReport()
 {
+    catchCoreStatus();
+    vector<std::string> temp;
+    temp.push_back("CPU utilization: " + std::to_string(core_utilization) + "%");
+    temp.push_back("Cores used: " + std::to_string(cores_used));
+    temp.push_back("Cores used: " + std::to_string(cores_available));
 
+    return temp;
 }

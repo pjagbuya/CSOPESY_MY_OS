@@ -5,6 +5,7 @@ CPUCore::CPUCore(int id)
     this->core_id = id;
     this->busy = false;
     this->ready = false;
+    this->leave.store(false);
 }
 
 
@@ -24,7 +25,6 @@ void CPUCore::run() {
 
         std::unique_lock<std::mutex> process_exec_lock(m_currProcessMutex);
         if (curr_p && ready.load()) {
-            sleep(std::chrono::milliseconds(CPU::getDelays()));
             if (!curr_p && curr_p->isFinished()) {
                 stopCore();
             }
@@ -39,11 +39,13 @@ void CPUCore::run() {
         }
         ready.store(false);
 
-        if(endBarrier||!m_stopFlag)
+        if(endBarrier|| m_stopFlag)
             endBarrier->arrive_and_wait();
 
 
     }
+
+    
 }
 bool CPUCore::isBusy() const
 {
@@ -95,8 +97,11 @@ void CPUCore::setBarriers(std::shared_ptr<std::barrier<>> startBarrier, std::sha
 
 void CPUCore::setReady()
 {
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        ready.store(true);
+    }
 
-    ready.store(true);
     
     cv.notify_one();
 
@@ -130,5 +135,10 @@ void CPUCore::stopPersistentThread()
 
     this->m_stopFlag.store(true);
     setReady();
+}
+
+bool CPUCore::isLeave()
+{
+    return leave.load();
 }
 

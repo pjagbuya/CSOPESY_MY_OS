@@ -131,57 +131,57 @@ void Scheduler::schedulerStart()
 	Screen::setProcessCount(0);
 	processList.clear();
 	screensList.clear();
-
 	while (getIsOn()) {
 
-		schedulerExecuteAlgrithm();
+        uint64_t delay = CPU::getDelays();
+		if(delay!=0 && cpu_cycle%delay==0)
+			schedulerExecuteAlgrithm();
 
-		if (!getIsStopScheduling()) {
+
+		uint64_t delay2 = CPU::getBatchProcessFreq();
+
+		if (delay2 != 0 && !getIsStopScheduling() && cpu_cycle%delay2==0) {
 			
 
-			for (int i = 0; i < CPU::getBatchProcessFreq(); i++) {
-				int currCount = Screen::getProcessCount();
-				std::string processName;
-				if (currCount < 10) {
-					processName = "process_0" + std::to_string(currCount);
-				}
-				else {
-					processName = "process_" + std::to_string(currCount);
-
-				}
-
-				std::shared_ptr<Screen> newScreen = std::make_shared<Screen>(processName);
-
-				std::shared_ptr<Process> p = newScreen->getAttachedProcess();
-
-
-
-				processList.push_back(p);
-
-				screensList.push_back(newScreen);
-
-
-				ScreenController::getInstance()->addScreen(newScreen);
-
-				ScreenController::getInstance()->setProcessAt(p->getPid(), p);
-
-
-				addProcess(p);
-
-				p->updateProcess();
-
-				algo.pushToReadyQueue(p);
+			int currCount = Screen::getProcessCount();
+			std::string processName;
+			if (currCount < 10) {
+				processName = "process_0" + std::to_string(currCount);
+			}
+			else {
+				processName = "process_" + std::to_string(currCount);
 
 			}
+
+			std::shared_ptr<Screen> newScreen = std::make_shared<Screen>(processName);
+
+			std::shared_ptr<Process> p = newScreen->getAttachedProcess();
+
+
+
+			processList.push_back(p);
+
+			screensList.push_back(newScreen);
+
+
+			ScreenController::getInstance()->addScreen(newScreen);
+
+			ScreenController::getInstance()->setProcessAt(p->getPid(), p);
+
+
+			addProcess(p);
+
+			p->updateProcess();
+
+			algo.pushToReadyQueue(p);
+
 
 
 		}
 		
 		ScreenController::getInstance()->notifyCleanUpLoop();
 
-		tick();
 
-		//std::this_thread::sleep_for(std::chrono::milliseconds(CPU_TICKS_MS));
 	}
 
 }
@@ -207,6 +207,10 @@ void Scheduler::schedulerDestroy()
 
 void Scheduler::schedulerStartRandomize()
 {
+	Screen::setProcessCount(0);
+	processList.clear();
+	screensList.clear();
+	algo.clearQueues();
 	setIsStopScheduling(false);
 }
 
@@ -473,4 +477,14 @@ void Scheduler::tick()
 {
 	cpu_cycle++;
 
+}
+
+std::queue<std::shared_ptr<Process>> Scheduler::getReadyQueue()
+{
+	return algo.getReadyQueue();
+}
+
+std::queue<std::shared_ptr<Process>> Scheduler::getRunningQueue()
+{
+	return algo.getRunningQueue();
 }

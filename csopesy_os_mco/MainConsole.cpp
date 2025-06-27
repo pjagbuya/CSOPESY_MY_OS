@@ -607,40 +607,48 @@ void MainConsole::setAnimationGo(bool go)
 	isAnimationGo = go;	
 
 }
-string MainConsole::getProcessNameAndInfo() { return ""; }
 
+string MainConsole::getProcessNameAndInfo() {
+	return "";
+}
 void MainConsole::saveReportUtil()
 {
+
+
+
+
+	std::queue<Process> runningQ = ScreenController::getInstance()->getRunningQueue();
+	std::queue<Process> terminatedQ = ScreenController::getInstance()->getTerminatedProcesses();
+	std::queue<Process> readyQ = ScreenController::getInstance()->getReadyQueue();
+
 
 	vector<string> terminated_list;
 	vector<string> running_list;
 	vector<string> ready_list;
 
-	for (auto& screen_ptr : ScreenController::getInstance()->getScreens()) {
-
-		//int id = screen_ptr->getAttachedProcess()->getPid();
-		//shared_ptr<Process> p = ScreenController::getInstance()->getProcessAt(id);
-		shared_ptr<Process> p = screen_ptr->getAttachedProcess();
-		if (p->getState() == ProcessState::FINISHED) {
-			terminated_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
-		else if (p->getState() == ProcessState::RUNNING) {
-			running_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
-		else if (p->getState() == ProcessState::READY) {
-			ready_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
-		else {
-			ready_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
+	while (!runningQ.empty()) {
+		running_list.push_back(runningQ.front().getProcessNameAndInfo());
+		runningQ.pop();
 	}
-	// Open file
+	while (!terminatedQ.empty()) {
+		terminated_list.push_back(terminatedQ.front().getProcessNameAndInfo());
+		terminatedQ.pop();
+	}
+	while (!readyQ.empty()) {
+		running_list.push_back(readyQ.front().getProcessNameAndInfo());
+		readyQ.pop();
+	}
+
 	std::ofstream reportFile("csopesy-log.txt");
 	if (!reportFile.is_open()) {
 		std::cerr << "Failed to open process_report.txt for writing.\n";
 		return;
 	}
 
+	std::vector<std::string> cpuReport = CPU::CpuReport();
+	for (const string& s : cpuReport) {
+		reportFile << s <<"\n";
+	}
 	// Write report
 	reportFile << "================= PROCESS REPORT =================\n\n";
 
@@ -664,26 +672,39 @@ void MainConsole::saveReportUtil()
 void MainConsole::displayCliAllProcess()
 {
 	ConsoleCliListFlush();
+
+
+	
 	vector<string> terminated_list;
 	vector<string> running_list;
 	vector<string> ready_list;
-	ConsoleListPush("================= PROCESS REPORT ================= ", 1, 0);
-	for (auto& screen_ptr : ScreenController::getInstance()->getScreens()) {
-		shared_ptr<Process> p = screen_ptr->getAttachedProcess();
 
-		if (p->getState() == ProcessState::FINISHED) {
-			terminated_list.push_back(screen_ptr->getProcessNameAndInfo());
+	int runningCores = 0;
+	for (auto& screen_ptr : ScreenController::getInstance()->getScreens()) {
+
+		Process p = *(screen_ptr->getAttachedProcess());
+		if (p.getState() == ProcessState::FINISHED) {
+			terminated_list.push_back(p.getProcessNameAndInfo());
 		}
-		else if (p->getState() == ProcessState::RUNNING) {
-			running_list.push_back(screen_ptr->getProcessNameAndInfo());
+		else if (p.getState() == ProcessState::RUNNING) {
+			running_list.push_back(p.getProcessNameAndInfo());
+			runningCores++;
+
 		}
-		else if (p->getState() == ProcessState::READY) {
-			ready_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
-		else {
-			ready_list.push_back(screen_ptr->getProcessNameAndInfo());
-		}
+
 	}
+
+
+	double core_utilization_percentage = static_cast<double>(runningCores) / CPU::getMaxCores() * 100.0; // Example calculated value
+	int core_utilization = static_cast<int>(core_utilization_percentage);
+
+	ConsoleListPush("CPU utilization: " + std::to_string(core_utilization) + "%", 1, 0);
+	ConsoleListPush("Cores used: " + std::to_string(runningCores), 1, 0);
+	ConsoleListPush("Cores available: " + to_string(CPU::getMaxCores()- runningCores), 1, 0);
+
+	ConsoleListPush("", 1, 0);
+
+	ConsoleListPush("================= PROCESS REPORT ================= ", 1, 0);
 
 	ConsoleListPush("Running Processes:", 1, 0);
 	for(const auto& s : running_list) {

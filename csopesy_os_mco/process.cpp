@@ -1,17 +1,45 @@
 #include "process.h"
-#include <random>
-#include <chrono>
+
+
+
+
+Process::Process(const Process& other)
+    : pid(other.pid),
+    name(other.name),
+    remainingTime(other.remainingTime),
+    current_line_instruction(other.current_line_instruction),
+    creation_time_stamp(other.creation_time_stamp),
+    total_lines_instruction(other.total_lines_instruction),
+    cpuCoreID(other.cpuCoreID),
+    symbolTable(other.symbolTable), 
+    forLoopTable(other.forLoopTable), 
+    process_output_list(other.process_output_list), 
+    coreLogs(other.coreLogs), 
+    variableCounter(other.variableCounter),
+    loggingLimit(other.loggingLimit),
+
+    processInfo(other.processInfo),
+    state(other.state),
+    delay(other.delay),
+    instruction_index(other.instruction_index),
+    commandList(other.commandList), 
+    commandExecutionTimes(other.commandExecutionTimes),
+    commandLineNumbers(other.commandLineNumbers),
+    currMsgLog(other.currMsgLog),
+    printLog(other.printLog)
+{
+
+}
 Process::~Process()
 {
     this->symbolTable.clear();
 }
 // Constructor
-Process::Process(int pid, std::string name, std::shared_ptr<std::vector<std::string>> out)
-    : pid(pid), name(name), remainingTime(0), current_line_instruction(0),
+Process::Process(int pid, std::string name, std::shared_ptr<std::vector<std::string>> out, std::string time)
+    : pid(pid), name(name), remainingTime(0), current_line_instruction(0), creation_time_stamp(time),
     total_lines_instruction(CPU::getMinIns()), cpuCoreID(-1)
 {
     this->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
-
     process_output_list = out;
 	state = READY;
     loggingLimit = 1;
@@ -53,7 +81,7 @@ void Process::moveToNextLine() {
 
 // True if all commands are done
 bool Process::isFinished() const {
-    return current_line_instruction >= total_lines_instruction || commandList.empty();
+    return current_line_instruction >= total_lines_instruction;
 }
 
 int Process::getRemainingTime() const {
@@ -118,8 +146,9 @@ void Process::updateForLoopTable(std::string varname, uint16_t value)
 }
 
 // Dummy placeholder since enum is private in header
-ProcessState Process::getState() const {
-    // You might want to store `state` in a private member (commented out in your header)
+ProcessState Process::getState() {
+    std::lock_guard<std::mutex> lock(mtx);
+
     return this->state;
 }
 std::string Process::getCurrMsgLog() {
@@ -214,7 +243,7 @@ void Process::setCurrMsgLog(std::string msg)
 
 void Process::sendPrintOut(std::string msg)
 {
-    process_output_list->push_back(msg);
+    //process_output_list->push_back(msg);
 }
 
 int Process::readAtForLoopTable(std::string msg)
@@ -225,3 +254,17 @@ int Process::readAtForLoopTable(std::string msg)
     return forLoopTable[msg];
 }
 
+string Process::getProcessNameAndInfo() {
+    if (this->isFinished()) {
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Finished\t" + " |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+
+    }
+    else if (this->getCommandCounter() == 0 || this->getCPUCoreID() == -1) {
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| IDLE\t" + " |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+
+    }
+    else {
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Core: " + std::to_string(this->getCPUCoreID()) + "\t |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+
+    }
+}

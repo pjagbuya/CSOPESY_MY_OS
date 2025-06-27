@@ -26,7 +26,7 @@ public:
     int getBarrierCount();
     void stopCore();  
     void stopPersistentThread();
-
+    bool isLeave();
 private:  
     int core_id;  
     std::atomic<bool> busy; // Use std::atomic instead of atomic  
@@ -35,6 +35,8 @@ private:
     std::shared_ptr<Process> curr_p;  
     std::atomic<bool> ready;
     std::condition_variable cv;
+    std::atomic<bool> leave;
+
 
 	int barrierCount = 0; 
     std::shared_ptr<std::barrier<>> startBarrier; // Barrier to synchronize start of all cores

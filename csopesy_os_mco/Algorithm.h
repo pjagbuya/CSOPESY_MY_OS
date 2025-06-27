@@ -23,7 +23,6 @@ public:
 	void initialize(std::queue<std::shared_ptr<Process>>& readyQueue,	
 	                std::queue<std::shared_ptr<Process>>& terminatedProcesses);
 	void pushToReadyQueue(std::shared_ptr<Process> p);
-	std::queue<std::shared_ptr<Process>> getTerminatedProcesses();
 	void popTerminatedProcesses();
 	std::shared_ptr<Process> frontTerminatedProcesses();
 
@@ -35,9 +34,15 @@ public:
 
 	void runRRAlgo();
 
+	void clearQueues();
+	void clearRunning();
+	std::queue<std::shared_ptr<Process>> getReadyQueue();
+	std::queue<std::shared_ptr<Process>> getRunningQueue();
+	std::queue<std::shared_ptr<Process>> getTerminatedProcesses();
 private:
 	AlgoType algo;
 	std::queue<std::shared_ptr<Process>> readyQueue;
+	std::queue<std::shared_ptr<Process>> runningQueue;
 	std::queue<std::shared_ptr<Process>> terminatedProcesses;
 
 	bool isThereTerminated;

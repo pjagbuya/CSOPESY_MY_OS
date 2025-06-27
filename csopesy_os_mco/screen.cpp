@@ -14,7 +14,6 @@ Screen::Screen(string name) :AConsole(name)  {
 	}
 	process_output_list = std::make_shared<vector<std::string>>();
 	this->process_name = name;
-	attachedProcess = std::make_shared<Process>(process_count, this->process_name, process_output_list);
 
 	auto now = std::chrono::system_clock::now();
 	time_t now_c = std::chrono::system_clock::to_time_t(now);
@@ -30,6 +29,9 @@ Screen::Screen(string name) :AConsole(name)  {
 	this->display_buffer = {};
 	ss << std::put_time(&tm_struct, "%m/%d/%Y, %I:%M:%S %p");
 	this->creation_timestamp = ss.str();
+	attachedProcess = std::make_shared<Process>(process_count, this->process_name, process_output_list, creation_timestamp);
+
+
 	this->name = "BASE_SCREEN";
 	this->process_name = name;
 
@@ -96,34 +98,27 @@ void Screen::UpdateDisplayBuffer() {
 void Screen::displayProcessSmi()
 {
 	this->cli_list.clear();
-	debug_msg = "cli_list cleared";
 
 	logs_buffer.clear();
-	debug_msg = "buffer cleared";
 
 	attachedProcess->ConsoleLogPush();
-	debug_msg = "Console Log pushed";
 
 	vector<std::string> temp = attachedProcess->getPrintLog();
-	debug_msg = "Print log pushed";
 
 	
 	for (string& strvar : temp) {
 		logs_buffer.push_back(strvar);
 	}
-	debug_msg = "T1";
 
 	if (attachedProcess->isFinished()) {
 		logs_buffer.push_back("");
 		logs_buffer.push_back("Finished!");
-		debug_msg = "T2";
 
 	}
 	else {
 		logs_buffer.push_back("");
 		logs_buffer.push_back("Current instruction line: " + std::to_string(attachedProcess->getCommandCounter()));
 		logs_buffer.push_back("Lines of code: " + std::to_string(attachedProcess->getLinesOfCode()));
-		debug_msg = "T3";
 
 	}
 

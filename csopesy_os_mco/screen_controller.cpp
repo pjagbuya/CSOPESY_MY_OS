@@ -55,6 +55,13 @@ ScreenController::ScreenController() {
 // Cleanup thread is called to stop 
 //
 ScreenController::~ScreenController() {
+
+	// Must release all screen pointers
+	// Stop the thread that looks for deleting screens
+	// join the clean upthread
+	// set screens empty
+	// Scheduler will destroy itself, stopping Cores First and then Algorithm
+	// Clear the process_table
 	ScreenController::main_screen.reset();
 	ScreenController::backup_main_screen.reset();
 	ScreenController::inputMan.~InputMan();
@@ -65,8 +72,8 @@ ScreenController::~ScreenController() {
 	}
 
 	ScreenController::screens = {};
-	process_table.clear();
 	scheduler->schedulerDestroy();
+	process_table.clear();
 
 
 }
@@ -245,6 +252,8 @@ void ScreenController::doThreadedMarquee() {
 	main_screen->ParseSkeys(action, sKeys);
 
 	main_screen->display();
+
+
 	Sleep(20);
 
 }
@@ -263,11 +272,13 @@ void ScreenController::callInputListener() {
 		main_screen->ParseAction(input, action);
 
 	}
+
 	main_screen->ParseSkeys(action, sKeys);
 
 	main_screen->display();
 	
 	Sleep(10); 
+	scheduler->tick();
 
 }
 void ScreenController::swapToMarquee() {
@@ -418,3 +429,53 @@ std::vector<std::shared_ptr<Screen>> ScreenController::getScreens()
 	return scheduler->getScreenList();
 }
 
+std::queue<Process> ScreenController::getReadyQueue()
+{
+	// 1. Get a copy of the queue of shared_ptrs from the scheduler
+	std::queue<std::shared_ptr<Process>> sharedPtrQueueCopy = scheduler->getReadyQueue();
+
+	std::queue<Process> processQueue;
+
+	while (!sharedPtrQueueCopy.empty()) {
+		std::shared_ptr<Process> currentProcessPtr = sharedPtrQueueCopy.front();
+		sharedPtrQueueCopy.pop();
+
+		if (currentProcessPtr) { 
+			processQueue.push(*currentProcessPtr); 
+		}
+	}
+	return processQueue;
+}
+
+std::queue<Process> ScreenController::getRunningQueue()
+{
+	std::queue<std::shared_ptr<Process>> sharedPtrQueueCopy = scheduler->getRunningQueue();
+
+	std::queue<Process> processQueue;
+
+	while (!sharedPtrQueueCopy.empty()) {
+		std::shared_ptr<Process> currentProcessPtr = sharedPtrQueueCopy.front();
+		sharedPtrQueueCopy.pop();
+
+		if (currentProcessPtr) {
+			processQueue.push(*currentProcessPtr); 
+		}
+	}
+	return processQueue;
+}
+std::queue<Process> ScreenController::getTerminatedProcesses()
+{
+	std::queue<std::shared_ptr<Process>> sharedPtrQueueCopy = scheduler->getTerminatedProcesses();
+
+	std::queue<Process> processQueue;
+
+	while (!sharedPtrQueueCopy.empty()) {
+		std::shared_ptr<Process> currentProcessPtr = sharedPtrQueueCopy.front();
+		sharedPtrQueueCopy.pop();
+
+		if (currentProcessPtr) {
+			processQueue.push(*currentProcessPtr); 
+		}
+	}
+	return processQueue;
+}

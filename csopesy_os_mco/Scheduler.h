@@ -56,7 +56,6 @@ public:
 	int getCpuCycle() const;
 	std::string getMsgLog() const;
 	std::vector<std::shared_ptr<Screen>> getScreenList() const;
-	std::queue<std::shared_ptr<Process>> getTerminatedProcesses();
 	void popTerminatedProcesses();
 	std::shared_ptr<Process> frontTerminatedProcesses();
 
@@ -71,6 +70,10 @@ public:
 
 
 	void tick();
+	std::queue<std::shared_ptr<Process>> getReadyQueue();
+	std::queue<std::shared_ptr<Process>> getTerminatedProcesses();
+	std::queue<std::shared_ptr<Process>> getRunningQueue();
+
 
 private:
 	Algorithm algo;

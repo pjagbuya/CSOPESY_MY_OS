@@ -28,6 +28,11 @@ private:
 	static std::string algoName;
 	static uint64_t min_ins;
 	static uint64_t max_ins;
+	static int cores_used;
+	static int cores_available;
+	static int core_utilization;
+
+
 
 
 
@@ -47,6 +52,11 @@ public:
 	static void removeFromCore(int coreID);
 	static void runCores();
 
+
+	static void catchCoreStatus();
+
+
+
 	static bool checkSyncCheck();
 	static void incSyncCheck(int coreID);
 	static int getMaxCores();
@@ -63,7 +73,7 @@ public:
 
 	static void stopAllCores();
 
-	void CpuReport();
+	static vector<string> CpuReport();
 
 
 

@@ -52,8 +52,7 @@ void ForCommand::execute() const {
 		if (currCounter >= counter) {
 			processTemp->updateForLoopTable("INTERRUPT", 0);
 
-			if (layer == 0)
-				processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
+
 			return;
 
 		}
@@ -79,8 +78,7 @@ void ForCommand::execute() const {
 			processTemp->updateForLoopTable(currCounterVar, currCounter);
 
 		}
-		if (layer == 0 && currCounter < counter)
-			processTemp->updateForLoopTable("FORLOOP_INTERRUPTED_1", 1);
+
 
 	}
 
