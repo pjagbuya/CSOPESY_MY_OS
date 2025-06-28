@@ -36,6 +36,7 @@ private:
     std::atomic<bool> ready;
     std::condition_variable cv;
     std::atomic<bool> leave;
+    int pid;
 
 
 	int barrierCount = 0; 

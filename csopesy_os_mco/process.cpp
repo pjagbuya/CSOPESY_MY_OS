@@ -59,8 +59,9 @@ void Process::addCommand(std::shared_ptr<ICommand> command) {
 
 // Executes the "current command" — stubbed logic
 void Process::executeCurrentCommand() {
-	std::lock_guard<std::mutex> lock(mtxProcess);
-    if(this->readAtForLoopTable("INTERRUPT") == 0)
+
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
         this->commandList.at(current_line_instruction)->execute();
 
 }
@@ -76,7 +77,7 @@ void Process::setProcessCommands(std::vector<std::shared_ptr<ICommand>> commands
 // Moves to the next command
 void Process::moveToNextLine() {
 
-    if(this && readAtForLoopTable("INTERRUPT")==0) current_line_instruction++;
+    if(this) current_line_instruction++;
 
 }
 
@@ -109,29 +110,30 @@ int Process::getCPUCoreID() const {
 
 std::unordered_map<std::string, uint16_t> Process::getSymbolTable()
 {
-    std::lock_guard<std::mutex> lock(mtx);
+    if (!this) return std::unordered_map<std::string, uint16_t>();
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
 	return symbolTable;
 }
 
 std::unordered_map<std::string, uint16_t> Process::getForLoopTable()
 {
-    std::lock_guard<std::mutex> lock(mtx);
+    if (!this) return std::unordered_map<std::string, uint16_t>();
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
     return forLoopTable;
 }
 
 void Process::updateSymbolTable(std::string varname, uint16_t value)
 {
-    if (this) {
-        std::lock_guard<std::mutex> lock(mtx);
-        if (symbolTable.find(varname) == symbolTable.end()) {
-            symbolTable[varname] = value;
-            variableCounter++; 
-        }
-        else {
-            symbolTable[varname] = value;
-        }
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (symbolTable.find(varname) == symbolTable.end()) {
+        symbolTable[varname] = value;
+        variableCounter++; 
+    }
+    else {
+        symbolTable[varname] = value;
     }
 
 
@@ -140,36 +142,40 @@ void Process::updateSymbolTable(std::string varname, uint16_t value)
 
 void Process::updateForLoopTable(std::string varname, uint16_t value)
 {
-    if (this) {
-        std::lock_guard<std::mutex> lock(mtx);
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
-        forLoopTable[varname] = value;
-    }
+    if(this)forLoopTable[varname] = value;
 
 }
 
 // Dummy placeholder since enum is private in header
 ProcessState Process::getState() {
-    std::lock_guard<std::mutex> lock(mtx);
-
-    return this->state;
+    if (!this) return READY;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
+        return this->state;
 }
 std::string Process::getCurrMsgLog() {
-    std::lock_guard<std::mutex> lock(mtxMsg);
-
-    return currMsgLog;
+    if (!this) return "";
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
+        return currMsgLog;
+    return "";
 }
 void Process::setProcessState(ProcessState state)
 {
-    std::lock_guard<std::mutex> lock(mtx);
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
-	this->state = state;
+    if (this)this->state = state;
 }
 void Process::setCPUCoreID(int id)
 {
-    std::lock_guard<std::mutex> lock(mtx);
-
-    this->cpuCoreID = id;
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
+        this->cpuCoreID = id;
 }
 std::string Process::getName() const {
 
@@ -179,9 +185,10 @@ std::string Process::getName() const {
 
 void Process::setCpuCoreID(int id)
 {
-    std::lock_guard<std::mutex> lock(mtx);
-
-    this->cpuCoreID = id;
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
+        this->cpuCoreID = id;
 }
 
 std::string Process::getTimeStamp()
@@ -263,9 +270,10 @@ void Process::resetLoggingLimit()
 
 void Process::setCurrMsgLog(std::string msg)
 {
-    std::lock_guard<std::mutex> lock(mtxMsg);
-
-    currMsgLog = msg;
+    if (!this) return;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (this)
+        currMsgLog = msg;
 }
 
 void Process::sendPrintOut(std::string msg)
@@ -275,23 +283,24 @@ void Process::sendPrintOut(std::string msg)
 
 int Process::readAtForLoopTable(std::string msg)
 {
-    std::lock_guard<std::mutex> lock(mtx);
+    if (!this) return 0;
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
-
-    return forLoopTable[msg];
+    if (this)
+        return forLoopTable[msg];
 }
 
 string Process::getProcessNameAndInfo() {
     if (this->isFinished()) {
-        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Finished\t" + " |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Finished\t" + " |Instruction: " + std::to_string(this->current_line_instruction) + " / " + std::to_string(this->total_lines_instruction);
 
     }
     else if (this->getCommandCounter() == 0 || this->getCPUCoreID() == -1) {
-        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| IDLE\t" + " |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| IDLE\t" + " |Instruction: " + std::to_string(this->current_line_instruction) + " / " + std::to_string(this->total_lines_instruction);
 
     }
     else {
-        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Core: " + std::to_string(this->getCPUCoreID()) + "\t |Instruction: " + std::to_string(this->getCommandCounter()) + " / " + std::to_string(this->getLinesOfCode());
+        return "process: " + name + +"\t(" + creation_time_stamp + ") " "| Core: " + std::to_string(this->cpuCoreID) + "\t |Instruction: " + std::to_string(this->current_line_instruction) + " / " + std::to_string(this->total_lines_instruction);
 
     }
 }

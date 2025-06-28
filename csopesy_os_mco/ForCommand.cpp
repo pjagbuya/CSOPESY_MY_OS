@@ -43,17 +43,15 @@ void ForCommand::execute() const {
 	std::string tempMsg = "FOR\t Nest level " + std::to_string(layer) + "| Counter progress: " + std::to_string(currCounter)+"/" +std::to_string(counter);
 	processTemp->setCurrMsgLog(tempMsg);
 	int core_id = processTemp->getCPUCoreID();
-	//int interrupt = processTemp->readAtForLoopTable("INTERRUPT");
+	int interrupt = processTemp->readAtForLoopTable("INTERRUPT");
 
 	//if (layer == 0) {
 	//	processTemp->updateForLoopTable("INTERRUPT", 0);
 	//}
 
-	while (currCounter < counter) {
+	while (currCounter < counter && interrupt==0) {
 		if (currCounter >= counter) {
 			processTemp->updateForLoopTable("INTERRUPT", 0);
-
-
 			break;
 
 		}
@@ -80,6 +78,7 @@ void ForCommand::execute() const {
 
 		}
 
+		interrupt = processTemp->readAtForLoopTable("INTERRUPT");
 
 	}
 

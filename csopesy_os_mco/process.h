@@ -84,7 +84,7 @@ private:
 	std::unordered_map<int, std::vector<std::string>> coreLogs;
 	int variableCounter;
 	int loggingLimit;
-	std::mutex mtx;
+	std::recursive_mutex mtx;
 	std::mutex mtxMsg;
 	std::mutex mtxProcess;
 

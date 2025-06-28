@@ -158,6 +158,8 @@ void CPU::stopAllCores()
         core->stopPersistentThread();
     }
     for (const auto& core : CPUCores) {
+        core->setReady();
+
         core->join();
     }
 
