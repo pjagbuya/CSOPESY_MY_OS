@@ -19,7 +19,7 @@ class Process
 public:
 
 	Process() = delete;
-	Process(const Process& other);
+
 	~Process();
 
 	Process(int pid, std::string name, std::shared_ptr<std::vector<std::string>> out, std::string time);
@@ -38,11 +38,11 @@ public:
 	std::string getName() const;
 	std::string getCurrMsgLog();
 	std::string getTimeStamp();
+
 	std::vector<std::string> getPrintLog();
+	
 	int getVariableCounter() const;
 	void incVariableCounter();
-
-
 
 	std::unordered_map<std::string, uint16_t> getSymbolTable();
 	std::unordered_map<std::string, uint16_t> getForLoopTable();
@@ -55,20 +55,14 @@ public:
 
 
 	void setCpuCoreID(int id);
-
-
 	void ConsoleLogPush();
-
-
 	void updateProcess();
-	void resetLoggingLimit();
 
 
 	void setCurrMsgLog(std::string msg);
 	void sendPrintOut(std::string msg);
 	int readAtForLoopTable(std::string msg);
 
-	std::string snapshotProcessNameAndInfo();
 	std::string getProcessNameAndInfo();
 
 
@@ -83,7 +77,6 @@ private:
 
 	std::unordered_map<int, std::vector<std::string>> coreLogs;
 	int variableCounter;
-	int loggingLimit;
 	std::recursive_mutex mtx;
 	std::mutex mtxMsg;
 	std::mutex mtxProcess;
@@ -97,8 +90,6 @@ private:
 	size_t instruction_index;
 	uint64_t current_line_instruction;  
 	uint64_t total_lines_instruction;
-
-
 
 	std::string currMsgLog;
 	std::vector<std::string> printLog;

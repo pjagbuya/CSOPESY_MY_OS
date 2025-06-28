@@ -12,7 +12,6 @@ public:
 
 	void addCommand(std::shared_ptr<ICommand>);
 
-	int getTotalInstructions() const;
 
 private:
 	std::vector<std::shared_ptr<ICommand>> commandList;

@@ -55,7 +55,7 @@ ScreenController::ScreenController() {
 // Cleanup thread is called to stop 
 //
 ScreenController::~ScreenController() {
-
+	stopScheduler();
 	// Must release all screen pointers
 	// Stop the thread that looks for deleting screens
 	// join the clean upthread

@@ -3,33 +3,7 @@
 
 
 
-Process::Process(const Process& other)
-    : pid(other.pid),
-    name(other.name),
-    remainingTime(other.remainingTime),
-    current_line_instruction(other.current_line_instruction),
-    creation_time_stamp(other.creation_time_stamp),
-    total_lines_instruction(other.total_lines_instruction),
-    cpuCoreID(other.cpuCoreID),
-    symbolTable(other.symbolTable), 
-    forLoopTable(other.forLoopTable), 
-    process_output_list(other.process_output_list), 
-    coreLogs(other.coreLogs), 
-    variableCounter(other.variableCounter),
-    loggingLimit(other.loggingLimit),
 
-    processInfo(other.processInfo),
-    state(other.state),
-    delay(other.delay),
-    instruction_index(other.instruction_index),
-    commandList(other.commandList), 
-    commandExecutionTimes(other.commandExecutionTimes),
-    commandLineNumbers(other.commandLineNumbers),
-    currMsgLog(other.currMsgLog),
-    printLog(other.printLog)
-{
-
-}
 Process::~Process()
 {
     this->symbolTable.clear();
@@ -42,9 +16,7 @@ Process::Process(int pid, std::string name, std::shared_ptr<std::vector<std::str
     this->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
     process_output_list = out;
 	state = READY;
-    loggingLimit = 1;
     currMsgLog = "EMPTY";
-    instruction_index = 0;
     this->variableCounter = 0;
 }
 
@@ -261,12 +233,6 @@ void Process::updateProcess() {
     this->variableCounter = symbolTable.size();
 }
 
-void Process::resetLoggingLimit()
-{
-
-	loggingLimit = 1;
-
-}
 
 void Process::setCurrMsgLog(std::string msg)
 {
