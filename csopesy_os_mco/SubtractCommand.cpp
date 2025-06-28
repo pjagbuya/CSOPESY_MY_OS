@@ -19,8 +19,7 @@ void SubtractCommand::execute() const {
     uint16_t final_result;
 
 
-    processTemp->setCurrMsgLog("Difference stored to " + var1 + ":" + " Subtracting " + std::to_string(var3) + " from " + std::to_string(var2) );
-    processTemp->ConsoleLogPush();
+    processTemp->setCurrMsgLog("SUBTRACT\t " + var1 + "=" + std::to_string(var2) + "-" + std::to_string(var3) );
 
     if (temp_result < 0) {
         final_result = 0;

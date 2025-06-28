@@ -1,10 +1,10 @@
-================= PROCESS REPORT =================
+CPU utilization: 80%Cores used: 4Cores available: 1================= PROCESS REPORT =================
 
 Running Processes:
-  - process: process_28	(06/27/2025, 05:26:13 AM) | Core: 0	 |Instruction: 9 / 1435
-  - process: process_29	(06/27/2025, 05:26:13 AM) | Core: 1	 |Instruction: 7 / 1112
-  - process: process_30	(06/27/2025, 05:26:13 AM) | Core: 2	 |Instruction: 7 / 1127
-  - process: process_31	(06/27/2025, 05:26:13 AM) | Core: 3	 |Instruction: 8 / 1177
+  - process: process_00	(06/28/2025, 05:37:47 AM) | Core: 0	 |Instruction: 37 / 211
+  - process: process_01	(06/28/2025, 05:37:52 AM) | Core: 1	 |Instruction: 18 / 206
+  - process: process_02	(06/28/2025, 05:37:52 AM) | Core: 2	 |Instruction: 16 / 387
+  - process: process_03	(06/28/2025, 05:37:52 AM) | Core: 3	 |Instruction: 14 / 214
 
 Finished Processes:
 

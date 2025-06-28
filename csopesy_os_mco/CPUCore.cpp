@@ -18,10 +18,11 @@ void CPUCore::run() {
 
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait_for(lock, std::chrono::milliseconds(1000), [&] {
-            return ready.load() || m_stopFlag;
+            return ready.load() || m_stopFlag.load();
             });
-        if (m_stopFlag) break;
 
+        if(m_stopFlag.load())
+            break;
 
         std::unique_lock<std::mutex> process_exec_lock(m_currProcessMutex);
         if (curr_p && ready.load()) {
@@ -37,9 +38,11 @@ void CPUCore::run() {
 
 
         }
+
+        process_exec_lock.unlock();
         ready.store(false);
 
-        if(endBarrier|| m_stopFlag)
+        if(endBarrier)
             endBarrier->arrive_and_wait();
 
 
@@ -71,9 +74,11 @@ void CPUCore::setCoreId(int id)
 
 void CPUCore::setCurrentProcess(std::shared_ptr<Process> p)
 {
-    std::unique_lock<std::mutex> lock(mtx);
+    std::unique_lock<std::mutex> lock(m_currProcessMutex);
     if (p == nullptr) {
-        this->curr_p->updateSymbolTable("INTERRUPT", 1);
+        if (this->curr_p) { 
+            this->curr_p->updateSymbolTable("INTERRUPT", 1);
+        }
         this->curr_p.reset();
     }
     else {
@@ -85,7 +90,8 @@ void CPUCore::setCurrentProcess(std::shared_ptr<Process> p)
 
 std::shared_ptr<Process> CPUCore::getCurrentProcess()
 {
-    std::unique_lock<std::mutex> lock(mtx);
+    std::unique_lock<std::mutex> lock(m_currProcessMutex);
+
 	return this->curr_p;
 }
 
@@ -128,11 +134,13 @@ void CPUCore::stopCore()
 
 void CPUCore::stopPersistentThread()
 {
+
+    std::unique_lock<std::mutex> lock(m_currProcessMutex);
     if (curr_p) {
         this->curr_p->updateSymbolTable("INTERRUPT", 1);
         this->curr_p.reset();
     }
-
+    lock.unlock();
     this->m_stopFlag.store(true);
     setReady();
 }

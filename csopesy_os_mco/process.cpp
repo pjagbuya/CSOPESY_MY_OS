@@ -45,6 +45,7 @@ Process::Process(int pid, std::string name, std::shared_ptr<std::vector<std::str
     loggingLimit = 1;
     currMsgLog = "EMPTY";
     instruction_index = 0;
+    this->variableCounter = 0;
 }
 
 // Add a command placeholder (not implemented due to missing ICommand list)
@@ -75,13 +76,15 @@ void Process::setProcessCommands(std::vector<std::shared_ptr<ICommand>> commands
 // Moves to the next command
 void Process::moveToNextLine() {
 
-    if(this) current_line_instruction++;
+    if(this && readAtForLoopTable("INTERRUPT")==0) current_line_instruction++;
 
 }
 
 // True if all commands are done
-bool Process::isFinished() const {
-    return current_line_instruction >= total_lines_instruction;
+bool Process::isFinished() {
+    if (this)
+        return current_line_instruction >= total_lines_instruction;
+    else return true;
 }
 
 int Process::getRemainingTime() const {
@@ -158,19 +161,26 @@ std::string Process::getCurrMsgLog() {
 }
 void Process::setProcessState(ProcessState state)
 {
+    std::lock_guard<std::mutex> lock(mtx);
+
 	this->state = state;
 }
 void Process::setCPUCoreID(int id)
 {
+    std::lock_guard<std::mutex> lock(mtx);
+
     this->cpuCoreID = id;
 }
 std::string Process::getName() const {
+
     return name;
 }
 
 
 void Process::setCpuCoreID(int id)
 {
+    std::lock_guard<std::mutex> lock(mtx);
+
     this->cpuCoreID = id;
 }
 
@@ -190,27 +200,39 @@ std::string Process::getTimeStamp()
 
 void Process::ConsoleLogPush()
 {
-    if(this)
-        coreLogs[cpuCoreID].push_back("(" + getTimeStamp() + ")" + " Core:" + std::to_string(this->cpuCoreID) + " " + this->getCurrMsgLog());
+    if (this) {
+        // Access the vector for the current CPUCoreID
+        std::vector<std::string>& logs_for_core = coreLogs[cpuCoreID]; // Access by [] creates if not exists
 
+        // If the vector already has 3 elements, remove the oldest one (the first element)
+        if (logs_for_core.size() >= 3) {
+            logs_for_core.erase(logs_for_core.begin());
+        }
+
+        // Add the new log message to the back
+        logs_for_core.push_back("(" + getTimeStamp() + ")" + " Core:" + std::to_string(this->cpuCoreID) + " " + this->getCurrMsgLog());
+    }
 }
 
 std::vector<std::string> Process::getPrintLog()
 {
 
+    printLog.clear();
+
     for (int i = 0; i < CPU::getMaxCores(); i++) {
+        if (coreLogs.count(i)) { // Check if key exists
+            const std::vector<std::string>& current_core_logs = coreLogs.at(i);
 
-        int logTrack = 0;
-
-        if (coreLogs.find(i) != coreLogs.end()) { // Ensure the coreLogs map contains the key
-            for (size_t j =0 ; j< coreLogs.at(i).size(); j++) {
-                printLog.push_back(coreLogs.at(i).at(j)); // Use `at()` for safe access
-                
-                logTrack++;
-                if (loggingLimit == logTrack && i == CPU::getMaxCores()-1) {
-					loggingLimit++;
-                }
+            // Determine the starting index to get the last 3 elements
+            // This is the key part for "most recent three" or "last three".
+            // If the vector has fewer than 3 elements, start from index 0.
+            // Otherwise, start from size - 3.
+            for (const std::string& log_entry : current_core_logs) {
+                printLog.push_back(log_entry);
             }
+
+
+
         }
     }
     return printLog;
@@ -221,10 +243,15 @@ int Process::getVariableCounter() const
     return variableCounter;
 }
 
+void Process::incVariableCounter()
+{
+	this->variableCounter++;
+}
+
 void Process::updateProcess() {
 
     this->total_lines_instruction = this->commandList.size();
-
+    this->variableCounter = symbolTable.size();
 }
 
 void Process::resetLoggingLimit()

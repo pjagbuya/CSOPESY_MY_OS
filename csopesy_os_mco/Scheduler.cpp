@@ -134,7 +134,9 @@ void Scheduler::schedulerStart()
 	while (getIsOn()) {
 
         uint64_t delay = CPU::getDelays();
-		if(delay!=0 && cpu_cycle%delay==0)
+		if(delay == 0)
+			schedulerExecuteAlgrithm();
+		else if (cpu_cycle % delay == 0)
 			schedulerExecuteAlgrithm();
 
 
@@ -247,6 +249,7 @@ std::shared_ptr<ICommand> Scheduler::generateRandomCommand(int pid, int layer, u
 
 	}
 	case DECLARE: {
+		tempProcess->incVariableCounter();
 		std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
 		return std::make_shared<DeclareCommand>(pid, varname, 10 + rand() % MAXNUMBER);
 	}

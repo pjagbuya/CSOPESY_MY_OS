@@ -12,8 +12,7 @@ DeclareCommand::DeclareCommand(int pid, std::string var1, uint16_t var2):IComman
 
 void DeclareCommand::execute() const {
 
-	process_table[pid]->setCurrMsgLog("Declaring " + var1 + ":" + std::to_string(var2));
-	process_table[pid]->ConsoleLogPush();
+	process_table[pid]->setCurrMsgLog("DECALRE\t Declaring " + var1 + "=" + std::to_string(var2));
 
 	process_table[pid]->updateSymbolTable(var1, var2);
 

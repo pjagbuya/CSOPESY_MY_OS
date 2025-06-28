@@ -97,7 +97,6 @@ public:
 
 	std::vector<std::shared_ptr<Process>> getProcessList();
 	std::unordered_map<int, std::shared_ptr<Process>> getProcessTable();
-	void setMessageAtScreen(int pid, std::string msgLog);
 
 	shared_ptr<Process> getProcessAt(int pid);
 	void setProcessAt(int pid, shared_ptr<Process>);

@@ -44,6 +44,9 @@ InputMan::InputMan() {
 
 }
 
+
+
+
 void InputMan::Input(std::string& input, int& sKeys, bool& isCmdDone) {
 
 	if (_kbhit()) {

@@ -62,11 +62,9 @@ ScreenController::~ScreenController() {
 	// set screens empty
 	// Scheduler will destroy itself, stopping Cores First and then Algorithm
 	// Clear the process_table
-	ScreenController::main_screen.reset();
-	ScreenController::backup_main_screen.reset();
-	ScreenController::inputMan.~InputMan();
+
 	stopCleanupThread = true;
-	cleanupCv.notify_one();
+	notifyCleanUpLoop();
 	if (cleanupThread.joinable()) {
 		cleanupThread.join();
 	}
@@ -74,7 +72,9 @@ ScreenController::~ScreenController() {
 	ScreenController::screens = {};
 	scheduler->schedulerDestroy();
 	process_table.clear();
-
+	ScreenController::main_screen.reset();
+	ScreenController::backup_main_screen.reset();
+	ScreenController::inputMan.~InputMan();
 
 }
 
@@ -149,7 +149,7 @@ std::shared_ptr<Screen> ScreenController::findScreen(std::string& name) {
 
 	
 	for (auto& screen_ptr : ScreenController::screens) {
-		if (screen_ptr->getName() == name) {
+		if (screen_ptr->getProcessName() == name) {
 			return screen_ptr; // Return the shared_ptr itself
 		}
 	}
@@ -206,7 +206,7 @@ void ScreenController::swapScreen(std::shared_ptr<Screen> newScreen) {
 		main_screen = newScreen;
 	}
 	else {
-		std::cerr << "Error, screen name '" + newScreen->getName() + "' NOT FOUND. Please try a different name." << endl;
+		std::cerr << "Error, screen name '" + newScreen->getProcessName() + "' NOT FOUND. Please try a different name." << endl;
 		return;
 	}
 
@@ -268,6 +268,7 @@ void ScreenController::callInputListener() {
 	
 	if (isCmdDone)
 	{
+
 		inputMan.CLI_Comms(input, action, isCmdDone, match);
 		main_screen->ParseAction(input, action);
 
@@ -277,7 +278,7 @@ void ScreenController::callInputListener() {
 
 	main_screen->display();
 	
-	Sleep(10); 
+	Sleep(5); 
 	scheduler->tick();
 
 }
@@ -343,20 +344,7 @@ std::vector<std::shared_ptr<Process>> ScreenController::getProcessList()
 {
 	return processList;
 }
-void ScreenController::setMessageAtScreen(int pid, std::string msgLog)
-{
-	std::shared_ptr<Screen> screenTemp = screens.at(pid);
-	std::shared_ptr<Process> processTemp = processList.at(pid);
 
-	screenTemp->ConsoleCliListFlush();
-	screenTemp->ConsoleListPush("Process name: " + screenTemp->getName(), 1, 0);
-	screenTemp->ConsoleListPush("ID: "+ std::to_string(pid) + screenTemp->getName(), 1, 0);
-	screenTemp->ConsoleListPush("Logs" + std::to_string(pid) + screenTemp->getName(), 1, 0);
-
-
-	
-
-}
 shared_ptr<Process> ScreenController::getProcessAt(int pid)
 {
 	return process_table[pid];

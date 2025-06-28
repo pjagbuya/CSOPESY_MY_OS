@@ -107,13 +107,13 @@ void MainConsole::ConsoleUpdateInput(string input) {
 
 	if (this->cli_list.size() > 39) {
 
-		this->ConsoleFill(this->header_frame_size + 3 + cli_list.size() - scrollOffset2, str(YELLOW) + std::to_string(scroll_offset) + " ACTIVE_LINE: " + std::to_string(active_line_count) + " Enter input : " + str(GREEN) + input + str(RESET));
+		this->ConsoleFill(this->header_frame_size + 3 + cli_list.size() - scrollOffset2, str(YELLOW) + "Enter input : " + str(GREEN) + input + str(RESET));
 		
 	}
 	else
 	{
 
-		this->ConsoleFill(this->header_frame_size + 2, str(YELLOW) + ScreenController::getInstance()->getDebugLogs() + std::to_string(active_line_count) + " Enter input : " + str(GREEN) + input + str(RESET));
+		this->ConsoleFill(this->header_frame_size + 2, str(YELLOW) + "Enter input : " + str(GREEN) + input + str(RESET));
 
 	}
 
@@ -393,7 +393,7 @@ void MainConsole::displayNvidiaSmiOutput() {
 			<< std::setw(9) << s->getPid() << "   "
 			<< std::setw(4) << "C+G" << "   "
 			<< std::left
-			<< std::setw(28) << limitStringStart(s->getName(), 28) << "    "
+			<< std::setw(28) << limitStringStart(s->getProcessName(), 28) << "    "
 			<< std::setw(9) << "N/A" << "|";
 		ConsoleListPush(ss.str(), 1, 0);
 	}
@@ -617,27 +617,33 @@ void MainConsole::saveReportUtil()
 
 
 
-	std::queue<Process> runningQ = ScreenController::getInstance()->getRunningQueue();
-	std::queue<Process> terminatedQ = ScreenController::getInstance()->getTerminatedProcesses();
-	std::queue<Process> readyQ = ScreenController::getInstance()->getReadyQueue();
 
 
 	vector<string> terminated_list;
 	vector<string> running_list;
 	vector<string> ready_list;
 
-	while (!runningQ.empty()) {
-		running_list.push_back(runningQ.front().getProcessNameAndInfo());
-		runningQ.pop();
+
+	int runningCores = 0;
+	for (auto& screen_ptr : ScreenController::getInstance()->getScreens()) {
+
+		Process p = *(screen_ptr->getAttachedProcess());
+		if (p.getState() == ProcessState::FINISHED) {
+			terminated_list.push_back(p.getProcessNameAndInfo());
+		}
+		else if (p.getState() == ProcessState::RUNNING) {
+			running_list.push_back(p.getProcessNameAndInfo());
+			runningCores++;
+
+		}
+
 	}
-	while (!terminatedQ.empty()) {
-		terminated_list.push_back(terminatedQ.front().getProcessNameAndInfo());
-		terminatedQ.pop();
-	}
-	while (!readyQ.empty()) {
-		running_list.push_back(readyQ.front().getProcessNameAndInfo());
-		readyQ.pop();
-	}
+
+
+	double core_utilization_percentage = static_cast<double>(runningCores) / CPU::getMaxCores() * 100.0; // Example calculated value
+	int core_utilization = static_cast<int>(core_utilization_percentage);
+
+
 
 	std::ofstream reportFile("csopesy-log.txt");
 	if (!reportFile.is_open()) {
@@ -645,10 +651,11 @@ void MainConsole::saveReportUtil()
 		return;
 	}
 
-	std::vector<std::string> cpuReport = CPU::CpuReport();
-	for (const string& s : cpuReport) {
-		reportFile << s <<"\n";
-	}
+	reportFile << "CPU utilization: " + std::to_string(core_utilization) + "%";
+	reportFile << "Cores used: " + std::to_string(runningCores);
+	reportFile << "Cores available: " + to_string(CPU::getMaxCores() - runningCores);
+
+	reportFile << "";
 	// Write report
 	reportFile << "================= PROCESS REPORT =================\n\n";
 

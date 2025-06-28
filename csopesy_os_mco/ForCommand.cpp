@@ -40,20 +40,21 @@ void ForCommand::execute() const {
 	std::shared_ptr<Process> processTemp = process_table[pid];
 	uint16_t currCounter = processTemp->readAtForLoopTable(currCounterVar);
 	uint16_t currCommandIndex = processTemp->readAtForLoopTable(currCommandIndexVar);
-	processTemp->ConsoleLogPush();
+	std::string tempMsg = "FOR\t Nest level " + std::to_string(layer) + "| Counter progress: " + std::to_string(currCounter)+"/" +std::to_string(counter);
+	processTemp->setCurrMsgLog(tempMsg);
 	int core_id = processTemp->getCPUCoreID();
-	int interrupt = processTemp->readAtForLoopTable("INTERRUPT");
+	//int interrupt = processTemp->readAtForLoopTable("INTERRUPT");
 
-	if (layer == 0) {
-		processTemp->updateForLoopTable("INTERRUPT", 0);
-	}
+	//if (layer == 0) {
+	//	processTemp->updateForLoopTable("INTERRUPT", 0);
+	//}
 
 	while (currCounter < counter) {
 		if (currCounter >= counter) {
 			processTemp->updateForLoopTable("INTERRUPT", 0);
 
 
-			return;
+			break;
 
 		}
 

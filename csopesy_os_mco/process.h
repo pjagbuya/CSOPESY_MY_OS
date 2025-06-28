@@ -28,7 +28,7 @@ public:
 	void setProcessCommands(std::vector<std::shared_ptr<ICommand>> commands);
 	void moveToNextLine();  
 
-	bool isFinished() const;  
+	bool isFinished();  
 	int getRemainingTime() const;  
 	int getCommandCounter() const;  
 	int getLinesOfCode() const;  
@@ -40,6 +40,8 @@ public:
 	std::string getTimeStamp();
 	std::vector<std::string> getPrintLog();
 	int getVariableCounter() const;
+	void incVariableCounter();
+
 
 
 	std::unordered_map<std::string, uint16_t> getSymbolTable();

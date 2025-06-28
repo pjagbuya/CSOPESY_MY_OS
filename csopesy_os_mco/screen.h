@@ -30,7 +30,7 @@ public:
 	Screen() = delete;
 	Screen(std::string name);
 
-	std::string getName();
+	std::string getProcessName();
 
 	void UpdateDisplayBuffer();
 	void displayProcessSmi();

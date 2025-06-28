@@ -30,6 +30,5 @@ void AddCommand::execute() const {
     }
 
     processTemp->updateSymbolTable(var1, final_result);
-    processTemp->setCurrMsgLog("Sum stored to " + var1 + ":" + " Adding " + std::to_string(var2) + " to " + std::to_string(var3));
-    processTemp->ConsoleLogPush();
+    processTemp->setCurrMsgLog("ADD\t " + var1 + "="  + std::to_string(var2) + " + " + std::to_string(var3));
 }

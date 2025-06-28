@@ -70,7 +70,6 @@ void Algorithm::executeAlgorithm() {
 
 void Algorithm::runFCFSAlgo()
 {
-    clearRunning();
 
     for (size_t i = 0; i < CPU::getMaxCores(); ++i) {
         if (CPUCores.empty()) {
@@ -112,11 +111,7 @@ void Algorithm::runFCFSAlgo()
 
         CPUCores[i]->setReady();
     }
-    for (int i = 0; CPUCores.size(); i++) {
-        if (CPUCores[i] && CPUCores[i]->getCurrentProcess())
-            runningQueue.push(CPUCores[i]->getCurrentProcess());
 
-    }
     //int newSyncNum = coresWithProcess.size();
 
     //std::shared_ptr<std::barrier<>> startBarrier = std::make_shared<std::barrier<>>(newSyncNum);
@@ -147,7 +142,6 @@ void Algorithm::runFCFSAlgo()
 
 void Algorithm::runRRAlgo()
 {
-    clearRunning();
 
     for (size_t i = 0; i < CPUCores.size(); i++) {
         //shared_ptr<CPUCore>& core = ;
@@ -164,7 +158,8 @@ void Algorithm::runRRAlgo()
                 process->setCPUCoreID(-1);
                 process->setProcessState(ProcessState::FINISHED);
                 
-                
+                isThereTerminated = true;
+
                 quantum_cycles[i] = 0;
                 CPUCores[i]->stopCore();
                 CPUCores[i]->setBusy(false);
@@ -177,15 +172,10 @@ void Algorithm::runRRAlgo()
                 readyQueue.push(process); // preempt
                 process->setCPUCoreID(-1);
                 process->setProcessState(ProcessState::WAITING);
-
                 CPUCores[i]->stopCore();
-
                 quantum_cycles[i] = 0;
                 CPUCores[i]->setBusy(false);
                 CPUCores[i]->setCurrentProcess(nullptr);
-
-
-
             }
             else {
                 quantum_cycles[i]++;
@@ -213,11 +203,6 @@ void Algorithm::runRRAlgo()
 
     
 
-    for (const auto& core : CPUCores) {
-        if(core->getCurrentProcess())
-            runningQueue.push(core->getCurrentProcess());
-
-    }
     //startBarrier = std::make_shared<std::barrier<>>(0);
     //endBarrier = std::make_shared<std::barrier<>>(0);
     //for (int& id : coresWithProcess) {

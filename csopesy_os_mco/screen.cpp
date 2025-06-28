@@ -4,7 +4,7 @@
 #include "screen_controller.h"
 #include "process.h"
 int Screen::process_count = 0;
-Screen::Screen(string name) :AConsole(name)  {
+Screen::Screen(string name) :AConsole("SCHEDULING_CONSOLE") {
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(ScreenController::getInstance()->getConsoleHandle(), &csbi);
@@ -40,7 +40,7 @@ Screen::Screen(string name) :AConsole(name)  {
 	this->header_frame_size=ascii_art.size() + this->display_buffer.size();
 	incProcessCount();
 	process_buffer.push_back("");
-	process_buffer.push_back("Process name: " + this->getName());
+	process_buffer.push_back("Process name: " + this->getProcessName());
 	process_buffer.push_back("ID: " + std::to_string(pid));
 	process_buffer.push_back("Logs:");
 	debug_msg = "DEFAULT";
@@ -72,7 +72,7 @@ void Screen::ConsoleFillHeader() {
 	this->ConsoleFill(this->header_frame_size + 1, str(YELLOW) + "'exit' to quit, 'clear' to clear the screen");
 }
 
-string Screen::getName() {
+string Screen::getProcessName() {
 	return process_name;
 }
 
