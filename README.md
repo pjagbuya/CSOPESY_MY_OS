@@ -30,7 +30,7 @@ If you downloaded the ZIP, open the extracted folder manually.
 ### 3. 🔁 Go to the `csopesy_os_mco` Directory
 
 ```bash
-cd csopesy_mco_o
+cd csopesy_os_mco
 ```
 
 ---
