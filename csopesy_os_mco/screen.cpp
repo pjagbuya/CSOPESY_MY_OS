@@ -200,24 +200,17 @@ void Screen::ConsoleOut() {
 void Screen::ParseAction(string& input, int& action)
 {
 
-	debug_msg = "parsing action";
 
 	switch (action) {
 	case 12:	// Displaying process-smi
-		debug_msg = "detected";
 
 		displayProcessSmi();
-		debug_msg = "finished smi";
 		break;
 	case 1:	// exit
 		this->isUsingScreen = false;
 		ScreenController::getInstance()->backToMain();
 		break;
 
-	case 7: // ping
-
-		ConsoleListPush("pong", 1, 0);
-		break;
 
 	case 8: // clear
 

@@ -329,9 +329,9 @@ std::string ScreenController::getDebugLogs()
 
 void ScreenController::startScheduler()
 {
-	processList.clear();
-	screens.clear();
-	process_table.clear();
+	//processList.clear();
+	//screens.clear();
+	//process_table.clear();
 	scheduler->schedulerStartRandomize();
 }
 

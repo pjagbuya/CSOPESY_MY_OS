@@ -450,8 +450,11 @@ void MainConsole::ParseAction(string& input, int& action)
 			break;
 
 		case 1:	// exit
+			cout << "Goodbye and Thank you!" << endl;
+
+
+
 			ScreenController::getInstance()->setCommandQuit(true);
-			ConsoleListPush( "Goodbye and Thank you!", 1 , 0);
 			main_displyed = true;
 			break;
 
