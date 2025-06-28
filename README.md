@@ -63,5 +63,3 @@ clang++ -std=c++20 -I . *.cpp -o my_os.exe
 > ```
 
 ---
-
-Let me know if you'd like a `Makefile` or compilation script included!
