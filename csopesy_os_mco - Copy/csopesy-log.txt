@@ -1,0 +1,23 @@
+CPU utilization: 100%Cores used: 16Cores available: 0================= PROCESS REPORT =================
+
+Running Processes:
+  - process: process_14	(06/28/2025, 09:53:01 PM) | Core: 8	 |Instruction: 18 / 5000
+  - process: process_15	(06/28/2025, 09:53:01 PM) | Core: 9	 |Instruction: 18 / 5000
+  - process: process_138	(06/28/2025, 09:53:22 PM) | Core: 10	 |Instruction: 6 / 5000
+  - process: process_139	(06/28/2025, 09:53:22 PM) | Core: 11	 |Instruction: 6 / 5000
+  - process: process_140	(06/28/2025, 09:53:22 PM) | Core: 12	 |Instruction: 6 / 5000
+  - process: process_141	(06/28/2025, 09:53:22 PM) | Core: 13	 |Instruction: 5 / 5000
+  - process: process_142	(06/28/2025, 09:53:22 PM) | Core: 14	 |Instruction: 5 / 5000
+  - process: process_143	(06/28/2025, 09:53:22 PM) | Core: 15	 |Instruction: 5 / 5000
+  - process: process_144	(06/28/2025, 09:53:22 PM) | Core: 0	 |Instruction: 2 / 5000
+  - process: process_145	(06/28/2025, 09:53:22 PM) | Core: 1	 |Instruction: 2 / 5000
+  - process: process_146	(06/28/2025, 09:53:23 PM) | Core: 2	 |Instruction: 2 / 5000
+  - process: process_147	(06/28/2025, 09:53:23 PM) | Core: 3	 |Instruction: 1 / 5000
+  - process: process_148	(06/28/2025, 09:53:23 PM) | Core: 4	 |Instruction: 1 / 5000
+  - process: process_149	(06/28/2025, 09:53:23 PM) | Core: 5	 |Instruction: 1 / 5000
+  - process: process_150	(06/28/2025, 09:53:23 PM) | Core: 6	 |Instruction: 1 / 5000
+  - process: process_151	(06/28/2025, 09:53:23 PM) | Core: 7	 |Instruction: 1 / 5000
+
+Finished Processes:
+
+==================================================
