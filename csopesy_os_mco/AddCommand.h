@@ -5,14 +5,14 @@
 class AddCommand: public ICommand
 {
 public:
-	AddCommand(int pid, std::string var1, uint16_t var2, uint16_t var3);
+	AddCommand(int pid, std::string var1, std::string var2, uint16_t var3);
 
 	void execute() const override;
 
 private:
 	int pid;
 	std::string var1;
-	uint16_t var2;
+	std::string var2;
 	uint16_t var3;
 
 };

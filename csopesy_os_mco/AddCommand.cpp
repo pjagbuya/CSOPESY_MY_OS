@@ -1,7 +1,7 @@
 #include "AddCommand.h"
 
 
-AddCommand::AddCommand(int pid, std::string var1, uint16_t var2, uint16_t var3):ICommand(pid, ADD)
+AddCommand::AddCommand(int pid, std::string var1, std::string var2, uint16_t var3):ICommand(pid, ADD)
 {
     this->pid = pid;
 	this->var1 = var1;
@@ -15,10 +15,15 @@ AddCommand::AddCommand(int pid, std::string var1, uint16_t var2, uint16_t var3):
 
 void AddCommand::execute() const {
 
-    unsigned long long temp_sum = static_cast<unsigned long long>(var2) + var3;
+
+
     std:: shared_ptr<Process> processTemp = process_table[pid];
     std::unordered_map<std::string, uint16_t> symbolTable = processTemp->getSymbolTable();
     uint16_t final_result;
+
+	uint16_t tempVar2 = symbolTable[var2];
+
+    unsigned long long temp_sum = static_cast<unsigned long long>(tempVar2) + var3;
 
 
 
@@ -30,5 +35,5 @@ void AddCommand::execute() const {
     }
 
     processTemp->updateSymbolTable(var1, final_result);
-    processTemp->setCurrMsgLog("ADD\t " + var1 + "="  + std::to_string(var2) + " + " + std::to_string(var3));
+    processTemp->setCurrMsgLog("ADD\t " + var1 + "="  + var2 + " + " + std::to_string(var3));
 }

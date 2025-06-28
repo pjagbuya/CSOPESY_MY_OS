@@ -35,6 +35,8 @@ Process::Process(int pid, std::string name, std::shared_ptr<std::vector<std::str
     total_lines_instruction(CPU::getMinIns()), cpuCoreID(-1)
 {
     this->updateForLoopTable("FORLOOP_INTERRUPTED_1", 0);
+    this->updateForLoopTable("x", 0);
+
     process_output_list = out;
 	state = READY;
     currMsgLog = "EMPTY";
@@ -53,9 +55,8 @@ void Process::addCommand(std::shared_ptr<ICommand> command) {
 // Executes the "current command" — stubbed logic
 void Process::executeCurrentCommand() {
 
-    std::lock_guard<std::recursive_mutex> lock(mtx);
-    if (this)
-        this->commandList.at(current_line_instruction)->execute();
+    std::lock_guard<std::mutex> lock(mtxProcess);
+    this->commandList.at(current_line_instruction)->execute();
 
 }
 
@@ -265,7 +266,7 @@ void Process::setCurrMsgLog(std::string msg)
 
 void Process::sendPrintOut(std::string msg)
 {
-    //process_output_list->push_back(msg);
+    process_output_list->push_back(msg);
 }
 
 int Process::readAtForLoopTable(std::string msg)

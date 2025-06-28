@@ -17,15 +17,13 @@ void PrintCommand::execute() const {
     std::string msg;
     auto it = table.find(this->msgLog);
     if (it != table.end()) {
-        msg = "PRINT\t Value from " + it->first + ": " + std::to_string(it->second);
+        msg = "Value from: " + std::to_string(it->second);
 
 
     }
-    else {
-        std::string name = process->getName();
-        msg = "PRINT\t Hello world from " + name + "!";
 
-    }
+    process->sendPrintOut(msg);
+
     process->setCurrMsgLog(msg);
 
 

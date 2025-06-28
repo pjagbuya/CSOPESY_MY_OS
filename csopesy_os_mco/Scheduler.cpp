@@ -217,210 +217,25 @@ std::shared_ptr<ICommand> Scheduler::generateRandomCommand(int pid, int layer, u
 {	
 	if (!getIsOn() || layer > 3 || currCount >= maxCount) return nullptr;
 
-	CommandType type = static_cast<CommandType>(rand() % 6);
 	std::shared_ptr<Process> tempProcess = processList.at(pid);
-
+	int type= (currCount % 2);
 
 	switch (type) {
-	case PRINT: {
-		int caseType = rand() % 2;
+	case 0: {
 		std::unordered_map<std::string, uint16_t> symbolTable = tempProcess->getSymbolTable();
-		std::string chosenVariable;
-		if (caseType == 1 && symbolTable.size() > 0) {
-			std::vector<std::string> keys;
-			for (const auto& pair : symbolTable) {
-				keys.push_back(pair.first);
-			}
-
-
-
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-
-			chosenVariable = keys[randomIndex];
-
-			return std::make_shared<PrintCommand>(pid, chosenVariable);
-
-		}
-
-		return std::make_shared<PrintCommand>(pid, "Hello World!");
+		return std::make_shared<PrintCommand>(pid, "x");
 
 	}
-	case DECLARE: {
-		tempProcess->incVariableCounter();
-		std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-		return std::make_shared<DeclareCommand>(pid, varname, 10 + rand() % MAXNUMBER);
-	}
-	case ADD: {
-		int caseType = rand() % 4;
+
+	case 1: {
+
 		std::unordered_map<std::string, uint16_t> symbolTable = tempProcess->getSymbolTable();
-		std::string chosenVariable;
-		std::vector<std::string> keys;
-		if (symbolTable.size() == 0) {
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-			return std::make_shared<DeclareCommand>(pid, varname, 10 + rand() % MAXNUMBER);
-		}
-		for (const auto& pair : symbolTable) {
-			keys.push_back(pair.first);
 
+		return std::make_shared<AddCommand>(pid, "x", "x", rand() % MAXNUMBER+1);
 
-		}
-		if (caseType==0) {
-
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable1 = keys[randomIndex];
-
-			randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable2 = keys[randomIndex];
-
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			return std::make_shared<AddCommand>(pid, varname, symbolTable[chosenVariable1], symbolTable[chosenVariable2]);
-
-
-		}
-		else if (caseType==1){
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable2 = keys[randomIndex];
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			return std::make_shared<AddCommand>(pid, varname, rand() % MAXNUMBER, symbolTable[chosenVariable2]);
-
-		}
-		else if (caseType == 2) {
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable1 = keys[randomIndex];
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			return std::make_shared<AddCommand>(pid, varname, symbolTable[chosenVariable1], rand() % MAXNUMBER);
-		}
-		else {
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			return std::make_shared<AddCommand>(pid, varname, rand() % MAXNUMBER, rand() % MAXNUMBER);
-
-		}
+		
 	}
-	case SUBTRACT:
-	{
-		int caseType = rand() % 4;
-		std::unordered_map<std::string, uint16_t> symbolTable = tempProcess->getSymbolTable();
-		std::string chosenVariable;
-		std::vector<std::string> keys;
-		for (const auto& pair : symbolTable) {
-			keys.push_back(pair.first);
 
-
-		}
-		if (symbolTable.size() == 0) {
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-			return std::make_shared<DeclareCommand>(pid, varname, 10 + rand() % MAXNUMBER);
-		}
-		if (caseType == 0) {
-
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable1 = keys[randomIndex];
-
-			randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable2 = keys[randomIndex];
-
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			uint16_t bigger = symbolTable[chosenVariable1];
-			uint16_t smaller = symbolTable[chosenVariable2];
-			if(bigger > smaller) {
-				return std::make_shared<SubtractCommand>(pid, varname, bigger, smaller);
-
-			}
-			else {
-				return std::make_shared<SubtractCommand>(pid, varname, smaller, bigger);
-
-			}
-
-
-
-		}
-		else if (caseType == 1) {
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable2 = keys[randomIndex];
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			uint16_t bigger = rand() % MAXNUMBER;
-			uint16_t smaller = symbolTable[chosenVariable2];
-			if (bigger > smaller) {
-				return std::make_shared<SubtractCommand>(pid, varname, bigger, smaller);
-
-			}
-			else {
-
-				return std::make_shared<SubtractCommand>(pid, varname, smaller, bigger);
-
-			}
-
-
-		}
-		else if (caseType == 2) {
-
-			size_t randomIndex = schedulerRandomizer(0, keys.size() - 1);
-			std::string chosenVariable1 = keys[randomIndex];
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-			uint16_t bigger = symbolTable[chosenVariable1];
-			uint16_t smaller = rand() % MAXNUMBER;
-			if (bigger > smaller) {
-				return std::make_shared<SubtractCommand>(pid, varname, bigger, smaller);
-
-			}
-			else {
-
-				return std::make_shared<SubtractCommand>(pid, varname, smaller, bigger);
-
-			}
-		}
-		else {
-			uint16_t bigger = rand() % MAXNUMBER;
-			uint16_t smaller = rand() % MAXNUMBER;
-
-			std::string varname = "var" + std::to_string(tempProcess->getVariableCounter());
-
-			if (bigger > smaller) {
-				return std::make_shared<SubtractCommand>(pid, varname, bigger, smaller);
-
-			}
-			else {
-
-				return std::make_shared<SubtractCommand>(pid, varname, smaller, bigger);
-
-			}
-		}
-	}
-	case SLEEP:
-		return std::make_shared<SleepCommand>(pid, rand() % 100);
-	case FOR:
-		if (layer < 3) {
-			
-			int forCounterRand = 1 + rand() % MAX_FOR_COUNTER;
-			auto loop = std::make_shared<ForCommand>(pid, forCounterRand, layer + 1);
-			
-			int num_comms = rand() % COMMANDS_PER_FOR;
-			for (int i = 0; i < num_comms; ++i) {
-
-				// Each command is ran by forCounterRand times
-				if(currCount + 1 > maxCount){
-					break;
-				}
-
-				loop->addCommand(generateRandomCommand(pid, layer + 1, currCount, maxCount));
-				currCount += 1;
-
-			}
-			return loop;
-		}
-		break;
 	default:
 		break;
 	}
