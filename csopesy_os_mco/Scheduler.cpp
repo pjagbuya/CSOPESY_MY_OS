@@ -209,10 +209,7 @@ void Scheduler::schedulerDestroy()
 
 void Scheduler::schedulerStartRandomize()
 {
-	Screen::setProcessCount(0);
-	processList.clear();
-	screensList.clear();
-	algo.clearQueues();
+
 	setIsStopScheduling(false);
 }
 

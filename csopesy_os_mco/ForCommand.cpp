@@ -82,9 +82,4 @@ void ForCommand::execute() const {
 
 	}
 
-
-
-
-
-
 }

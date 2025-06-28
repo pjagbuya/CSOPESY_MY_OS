@@ -569,9 +569,7 @@ void MainConsole::ParseAction(string& input, int& action)
 			}
 
 			break;
-		case 11: // d for debug mode:
-			ScreenController::getInstance()->debugLogs();
-			break;
+
 		case -1: // Invalid command
 
 			ConsoleListPush("Invalid command. Please try again.",1, 0);

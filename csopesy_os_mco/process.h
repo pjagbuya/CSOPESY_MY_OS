@@ -22,7 +22,9 @@ public:
 	Process(const Process&);
 	~Process();
 
-	Process(int pid, std::string name, std::shared_ptr<std::vector<std::string>> out, std::string time);
+	Process(int pid, std::string name, 
+			std::shared_ptr<std::vector<std::string>> out, 
+			std::string time);
 	void addCommand(std::shared_ptr<ICommand> command);
 	void executeCurrentCommand();  
 	void setProcessCommands(std::vector<std::shared_ptr<ICommand>> commands);
