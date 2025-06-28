@@ -19,7 +19,7 @@ class Process
 public:
 
 	Process() = delete;
-
+	Process(const Process&);
 	~Process();
 
 	Process(int pid, std::string name, std::shared_ptr<std::vector<std::string>> out, std::string time);

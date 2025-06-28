@@ -630,7 +630,7 @@ void MainConsole::saveReportUtil()
 	int runningCores = 0;
 	for (auto& screen_ptr : ScreenController::getInstance()->getScreens()) {
 
-		Process p = *(screen_ptr->getAttachedProcess());
+		Process& p = *(screen_ptr->getAttachedProcess());
 		if (p.getState() == ProcessState::FINISHED) {
 			terminated_list.push_back(p.getProcessNameAndInfo());
 		}

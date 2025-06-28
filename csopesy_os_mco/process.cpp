@@ -1,9 +1,30 @@
 #include "process.h"
 
 
+Process::Process(const Process& other)
+    : pid(other.pid),
+    name(other.name),
+    remainingTime(other.remainingTime),
+    current_line_instruction(other.current_line_instruction),
+    creation_time_stamp(other.creation_time_stamp),
+    total_lines_instruction(other.total_lines_instruction),
+    cpuCoreID(other.cpuCoreID),
+    symbolTable(other.symbolTable), 
+    forLoopTable(other.forLoopTable), 
+    process_output_list(other.process_output_list), 
+    coreLogs(other.coreLogs), 
+    variableCounter(other.variableCounter),
+    processInfo(other.processInfo),
+    state(other.state),
+    delay(other.delay),
+    commandList(other.commandList), 
+    commandExecutionTimes(other.commandExecutionTimes),
+    commandLineNumbers(other.commandLineNumbers),
+    currMsgLog(other.currMsgLog),
+    printLog(other.printLog)
+{
 
-
-
+}
 Process::~Process()
 {
     this->symbolTable.clear();

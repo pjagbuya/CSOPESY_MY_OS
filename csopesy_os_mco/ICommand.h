@@ -33,7 +33,6 @@ protected:
 	int pid; // Process ID
 	CommandType commandType;
 	std::string msgLog;
-	std::mutex mtx;
 
 	
 };
