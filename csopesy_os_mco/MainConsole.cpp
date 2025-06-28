@@ -453,7 +453,7 @@ void MainConsole::ParseAction(string& input, int& action)
 			cout << "Goodbye and Thank you!" << endl;
 
 
-
+			ScreenController::getInstance()->startScheduler();
 			ScreenController::getInstance()->setCommandQuit(true);
 			main_displyed = true;
 			break;
